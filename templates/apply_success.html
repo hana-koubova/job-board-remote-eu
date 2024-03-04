@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+
+<div class="container">
+
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <h1 class="my-5">Success!</h1>
+        </div>
+    </div>
+
+    <div class="row d-flex justify-content-center mb-5">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <p>We sent your info to {{ company.name }}</p>
+        </div>
+        
+    </div>
+</div>
+
+
+{% endblock %}

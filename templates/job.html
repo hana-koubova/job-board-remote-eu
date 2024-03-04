@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block content %}
+
+<div class="container m-5 d-flex flex-column align-items-center">
+<div class="row w-75 d-flex">
+    <div class="col-lg-6 col-sm-12">
+        <h1>{{ job.role }} in {{ company.name }}</h>
+    </div>
+    <div class="col-lg-6 col-sm-12">
+        <img src="/static/images/placeholder-image.jpg" width="200px">
+    </div>
+</div>
+
+<div class="row w-75 font-monospace m-5">
+    <div class="col-lg-8 col-sm-12">
+        <p>Salary: {{ job.salary }}</p>
+        <br>
+        <p>Start date: {{ job.start_date }}</p>
+        <br>
+        <p>Key Skills: {{ job.skills }}</p>
+        <br>
+        <p>Level: {{ job.level }}</p>
+        <br>
+        {{ job.job_info|safe }}
+        <br>
+        <hr class="w-75">
+    </div>
+    <div class="mt-5 mb-5">
+        <h3>About {{ company.name }}</h3>
+        {{ company.about|safe }}
+        <hr class="w-75">
+    </div>
+    <div>
+        <p>Contact: {{ job.contact }}</p>
+        <a class="btn btn-primary" href="{{ url_for('apply', job_id=job.id) }}">Apply</a>
+    </div>
+</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+
+<h1 class="text-center m-3">Company Profile Edit</h1>
+<div class="container w-75 flex-column border rounded p-3">
+
+    <form class="edit_form" method="POST" action="{{ url_for('edit_company') }}">     
+        
+        {{ form.csrf_token }}
+        {{ form.name.label(class="form-label") }}
+        <br>
+        {{ form.name(value=existing_company.name, class_="form-control") }}
+        <br>
+        {{ form.url.label(class="form-label") }}
+        <br>
+        {{ form.url(value=existing_company.url, class_="form-control") }}
+        <br>
+
+       <!--Drop dow for industry with selected value-->
+        <label for="industry" class="form-label">Industry</label>
+        <br>
+        <select name="industry" id="industry" class="form-control">
+        {% for industry in industries %}
+            {% if existing_company.industry == industry %}
+                <option selected>{{ industry }}</option>
+            {% else %}
+                <option>{{ industry }}</option>
+            {% endif %}
+
+        {% endfor %}
+        </select>
+        <br>
+        <!--End of custom select field-->
+
+
+        {{ form.contact.label(class="form-label") }}
+        <br>
+        {{ form.contact(value=existing_company.contact, class_="form-control") }}
+        <br>
+        {{ form.address.label(class="form-label") }}
+        <br>
+        {{ form.address(value=existing_company.address, class_="form-control") }}
+        <br>
+        {{ form.about.label(class="form-label") }}
+        <br>
+        <!--{{ form.about(value=existing_company.about, class_="form-control") }}-->
+        {{ ckeditor.create(value=existing_company.about, name="about") }}
+        <br>
+        {{ form.submit(class="btn btn-primary") }}
+        
+    </form>
+    
+</div>
+{{ ckeditor.load() }}
+{{ ckeditor.config(name="about",
+                    custom_config="
+                        scayt_autoStartup:true,
+                        toolbar: [
+                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
+                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
+                            { name: 'editing', items: [ 'Scayt' ]}
+                    
+                        ]") }}
+
+
+{% endblock %}

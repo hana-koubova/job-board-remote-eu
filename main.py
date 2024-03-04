@@ -1,0 +1,637 @@
+import uuid
+import time
+import datetime
+import json
+
+## Flask
+
+from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify
+
+## Login and security
+
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+#from flask_oauthlib.client import OAuth
+
+## Databases
+
+from database import db
+
+## WTFORMS
+
+from flask_wtf.csrf import CSRFProtect
+
+
+## Others
+
+from flask_bootstrap import Bootstrap5
+from flask_ckeditor import CKEditor, CKEditorField
+from sqlalchemy import and_, select, or_, func, desc
+
+## Modules
+
+from helper import url_friendly, load_user, load_profile, load_company, load_jobs, get_categories
+
+## Tables and Forms
+
+from tables import User, PersonalProfile, Company, Job
+from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideToolbar, SideCategoryToolbar, SearchForm, SideTypeJobForm, SideLevelForm, ApplyForm
+
+## Internal
+
+from categories import company_industries, all_categories, job_categories, job_types, job_levels, test_categories, two_word_categories, job_categories_full, job_categories_promo, job_promo_links
+from texts import toolpits
+
+## App initiation
+
+app = Flask(__name__)
+ckeditor = CKEditor(app)
+
+bootstrap = Bootstrap5(app)
+## To generate random key
+#secret_key = uuid.uuid4().hex
+app.config['SECRET_KEY'] = '287286a1716e47b1a244016e3763fb22'
+
+## CSFP protection
+csrf = CSRFProtect(app)
+csrf.init_app(app)
+
+## CREATE DATABASE
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+db.init_app(app)
+
+## Configure logging manager
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+## Create a user_loader callback
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.get_or_404(User, user_id)
+
+with app.app_context():
+    db.create_all()
+
+
+## Routing
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    form = SearchForm()
+    if request.method == 'POST':
+        search_keyword = request.form['job-title']
+        print(search_keyword)
+        return redirect(url_for('board', search=search_keyword))
+    return render_template("index.html",
+                           form=form,
+                           job_categories=job_categories_promo,
+                           links=job_promo_links,
+                           logged_in = current_user.is_authenticated)
+
+ITEMS = list(range(1, 101))
+
+@app.route('/pagination', methods=['GET', 'POST'])
+def pagination():
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 20
+    total_pages = (len(ITEMS) + items_per_page - 1) // items_per_page
+    total_pages_list = list(range(1, total_pages+1))
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+
+    items_on_page = ITEMS[start:end]
+    return render_template('pagination.html',
+                           items = ITEMS,
+                           page = page,
+                           items_on_page = items_on_page,
+                           total_pages = total_pages,
+                           total_pages_list = total_pages_list,
+                           logged_in = current_user.is_authenticated)
+
+
+@app.route('/board', methods=['GET', 'POST'])
+def board():
+    search = request.args.getlist('search')
+    category = request.args.getlist('category')
+    page = request.args.get('page', 1, type=int)
+    dict_query = request.args.to_dict(flat=False)
+    print('URL PARAMS: ', category)
+    print('SEARCH PARAMS: ', search)
+    print('CAT LEN: ', len(category))
+    print('SEARCH LEN: ', len(search))
+    print('URL DICT: ', dict_query)
+    category_form = SideCategoryToolbar()
+
+
+    filter_conditions_cat=[]
+    filter_conditions_typ=[]
+    filter_conditions_lev=[]
+
+    if len(category) == 0 and len(search) == 0:
+        print('NO PARAMS')
+        jobs_intersection = Job.query.order_by(desc(Job.time_publish)).all()
+    else:
+        # Exsiting category
+        if len(category) > 0:
+            for q in category:
+                if q in job_categories:
+                    print("JOB CATEGORY DETECTED")
+                    filter_condition_cat = func.lower(func.replace(func.replace(func.replace(Job.category, ' ', ''), '/', ''), '-', '')) == q
+                    filter_conditions_cat.append(filter_condition_cat)
+                if q in job_types:
+                    print("JOB TYPE DETECTED")
+                    filter_condition_typ = func.lower(func.replace(func.replace(func.replace(Job.job_type, ' ', ''), '/', ''), '-', '')) == q
+                    filter_conditions_typ.append(filter_condition_typ)
+                if q in job_levels:
+                    print("JOB LEVEL DETECTED")
+                    filter_condition_lev = func.lower(func.replace(func.replace(func.replace(Job.level, ' ', ''), '/', ''), '-', '')) == q
+                    filter_conditions_lev.append(filter_condition_lev)
+            jobs = Job.query.filter(or_(*filter_conditions_cat)).order_by(desc(Job.time_publish)).all()
+            types = Job.query.filter(or_(*filter_conditions_typ)).order_by(desc(Job.time_publish)).all()
+            levels = Job.query.filter(or_(*filter_conditions_lev)).order_by(desc(Job.time_publish)).all()
+            
+            # finding intersection based on IDs
+            job_ids = {job.id for job in jobs}
+            type_ids = {job.id for job in types}
+            level_ids = {job.id for job in levels}
+
+            common_category_ids = job_ids.intersection(type_ids, level_ids)
+
+            jobs_intersection = Job.query.filter(Job.id.in_(common_category_ids)).order_by(desc(Job.time_publish)).all()
+        
+        # Existing search
+        if len(search) > 0:
+            print("SEARCH DETECTED")
+            
+            search_filtered = Job.query.order_by(
+                (desc(Job.time_publish))).filter(or_(
+                Job.role.like(f"%{search[0]}%"),
+                Job.job_info.like(f"%{search[0]}%"),
+                Job.skills.like(f"%{search[0]}%"),
+                Job.category.like(f"%{search[0]}%")
+                )).all()
+            
+            jobs_intersection = search_filtered
+
+        # Both category and search
+        if len(search) > 0 and len(category) > 0:
+            search_ids = {job.id for job in search_filtered}
+            common_all_ids = common_category_ids.intersection(search_ids)
+
+            jobs_intersection = Job.query.filter(Job.id.in_(common_all_ids)).order_by(desc(Job.time_publish)).all()
+
+    print('JOBS LEN: ', len(jobs_intersection))
+    jobs_len = len(jobs_intersection)
+
+    #Pagination
+    items_per_page = 5
+    total_pages = (len(jobs_intersection) + items_per_page - 1) // items_per_page
+    total_pages_list = list(range(1, total_pages+1))
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+
+    items_on_page = jobs_intersection[start:end]
+
+
+    if request.method == 'POST':
+            filters_by_user = get_categories(request.form)
+            #search_by_user = request.form.get('searchfield')
+            search_by_user = request.form['searchfield']
+            print('POST:', filters_by_user, search_by_user)
+            if search_by_user == '':
+                print('POST ONLY CAT')
+                return redirect(url_for('board', category=filters_by_user, page=page))
+            if len(filters_by_user) == 0:
+                print('POST ONLY SEARCH')
+                return redirect(url_for('board', search=search_by_user, page=page))
+            if search_by_user != '' and len(filters_by_user) > 0:
+                print('POST CAT AND SEARCH')
+                return redirect(url_for('board', category=filters_by_user, search=search_by_user, page=page))
+
+    return render_template("board.html",
+                            url_query=category,
+                            search_query=search,
+                            jobs=jobs_intersection,
+                            jobs_len=jobs_len,
+                            category_form=category_form,
+                            categories=all_categories,
+                            job_categories=job_categories,
+                            categories_full=job_categories_full,
+                            job_levels=job_levels,
+                            job_types=job_types,
+                            
+                            page = page,
+                            items_on_page = items_on_page,
+                            total_pages = total_pages,
+                            total_pages_list = total_pages_list,
+
+                            logged_in = current_user.is_authenticated)
+
+
+@app.route('/board_js', methods=['GET', 'POST'])
+def board_js():
+    jobs_intersection = Job.query.order_by(desc(Job.time_publish)).all()
+    filter_conditions_cat=[]
+    filter_conditions_typ=[]
+    filter_conditions_lev=[]
+
+    #try:
+    if request.method == 'POST':
+            ## recieving Ajax
+            data = request.get_json('filters_dict')
+            filters_to_apply = []
+            for key, value in data.items():
+                if value == True:
+                    filters_to_apply.append(key)
+            print(filters_to_apply)
+
+            if filters_to_apply:
+            
+                for filter in filters_to_apply:
+                    if filter in job_categories:
+                        print("JOB CATEGORY DETECTED")
+                        filter_condition = func.lower(func.replace(func.replace(func.replace(Job.category, ' ', ''), '/', ''), '-', '')) == filter
+                        filter_conditions_cat.append(filter_condition)
+                        print('LENGHT: ', len(filter_conditions_cat))
+                    if filter in job_types:
+                        print("JOB TYPE DETECTED")
+                        filter_condition = func.lower(func.replace(func.replace(func.replace(Job.job_type, ' ', ''), '/', ''), '-', '')) == filter
+                        filter_conditions_typ.append(filter_condition)
+                    if filter in job_levels:
+                        print("JOB LEVEL DETECTED")
+                        filter_condition = func.lower(func.replace(func.replace(func.replace(Job.level, ' ', ''), '/', ''), '-', '')) == filter
+                        filter_conditions_lev.append(filter_condition)
+
+                jobs = Job.query.order_by(desc(Job.time_publish)).filter(or_(*filter_conditions_cat)).all()
+                types = Job.query.order_by(desc(Job.job_type)).filter(or_(*filter_conditions_typ)).all()
+                levels = Job.query.order_by(desc(Job.level)).filter(or_(*filter_conditions_lev)).all()
+                jobs_intersection = set(jobs) & set(levels) & set(types)
+                
+    if request.method == 'POST':
+        print("POST")
+        jobs_intersection = Job.query.all()
+
+    print("The End")
+    return render_template("archived/board_js.html",
+                            jobs=jobs_intersection,
+                            categories=all_categories,
+                            job_categories=job_categories,
+                            categories_full=job_categories_full,
+                            job_levels=job_levels,
+                            job_types=job_types,
+                            logged_in = current_user.is_authenticated)
+
+
+#@app.route('/ajax', methods=['GET', 'POST'])
+def ajax():
+        if request.method == 'POST':
+            data = request.json.get('data')
+            result = sum(data)
+            return jsonify({'result': result})
+    #return render_template('min_ajax.html')
+
+@app.route('/ajax', methods=['GET', 'POST'])
+def ajax_route():
+    return ajax()
+
+
+@app.route("/search", methods=['GET'])
+def search():
+    query = request.args.get("query") # here query will be the search inputs name
+    search_match = Job.query.filter(Job.title.like("%"+query+"%")).all()
+    return #render_template("search.html", query=query, allVideos=allVideos)
+
+
+@app.route('/post_job', methods=['GET', 'POST'])
+def post_job():
+    post_job_form = JobForm()
+    company=load_company()
+    toolpits_to_send = toolpits['post_job']
+    if post_job_form.validate_on_submit() and request.method == 'POST':
+        existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
+
+        # Publish job or keep it hidden
+        publish = False
+        if bool(request.form['active'] == 'Active (Publish right away)'):
+            publish = True
+
+        new_job = Job(role=request.form['role'],
+                    salary = request.form['salary'],
+                    start_date = request.form['start_date'],
+                    job_type = request.form['job_type'],
+                    category = request.form['category'],
+                    skills = request.form['skills'],
+                    level = request.form['level'],
+                    job_info = request.form['job_info'],
+                    contact = request.form['contact'],
+                    active = publish,
+                    time_publish = datetime.datetime.now(),
+                    user_id = current_user.id,
+                    company_id = existing_company.id)
+        db.session.add(new_job)
+        #print(type(new_job.job_type))
+        # only add job if in active status
+        if publish == True:
+            existing_company.add_job()
+
+        else:
+            existing_company.archive_new_job()
+        db.session.commit()
+        #return redirect(url_for('profile'))
+        return redirect(url_for('success_gen', message="Hey, this is success Yay!"))
+    return render_template("post_job.html",
+                           company=company,
+                           form=post_job_form,
+                           toolpits=toolpits_to_send,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/success/<string:message>')
+def success_gen(message):
+    return render_template('success.html',
+                           message=message), {"Refresh": "3; url=/profile"}
+
+@app.route('/about')
+def about():
+    return render_template("about.html", logged_in = current_user.is_authenticated)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    registration_form = RegistrationForm()
+    if registration_form.validate_on_submit() and request.method == 'POST':
+            hash_and_salted_password = generate_password_hash(
+                request.form.get('password'),
+                method='pbkdf2:sha256',
+                salt_length=8
+            )
+            new_user = User(email=request.form['email'],
+                password=hash_and_salted_password,
+                company=request.form['company'])
+            
+            db.session.add(new_user)
+            db.session.commit()
+
+            # Log in and authenticate user after adding details to database
+            login_user(new_user)
+            
+            return redirect(url_for('register_step2', logged_in = current_user.is_authenticated))
+    return render_template("register.html", form=registration_form, logged_in = current_user.is_authenticated)
+
+@app.route('/register_step2', methods=['GET', 'POST'])
+@login_required
+def register_step2():
+    # Create a company in the dat
+
+    new_company = Company(name=current_user.company,
+                        name_slug=url_friendly(current_user.company),
+                        url=' ',
+                        about=' ',
+                        contact=' ',
+                        address=' ',
+                        num_of_jobs=0,
+                        num_of_hidden_jobs=0,
+                        administrator_id=current_user.id)
+    db.session.add(new_company)
+    db.session.commit()
+    return redirect((url_for('register_step3', logged_in = current_user.is_authenticated)))
+
+@app.route('/register_step3', methods=['GET', 'POST'])
+@login_required
+def register_step3():
+    new_person_profile = PersonalProfile(user_id=current_user.id,
+                        f_name=' ',
+                        l_name=' ',
+                        role=' ',
+                        about=' ')
+    db.session.add(new_person_profile)
+    db.session.commit()
+    return redirect(url_for('profile', logged_in = current_user.is_authenticated))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    login_form = LoginForm()
+    if login_form.validate_on_submit() and request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+     
+        # Find user by email
+        result = db.session.execute(db.select(User).where(User.email == email))
+        user = result.scalar()
+
+        # Check password hash
+        try:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                return redirect(url_for('profile'))
+            else:
+                 error = 'Wrong password'
+        except AttributeError:
+            error = 'Email is not registered in database'
+    return render_template('login.html', form=login_form, error=error, logged_in = current_user.is_authenticated)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    existing_profile = PersonalProfile.query.filter_by(user_id=current_user.id).first()
+    existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
+    existing_jobs = Job.query.filter_by(company_id=existing_company.id).all()
+    job = Job.query.filter_by(company_id=existing_company.id).first()
+    return render_template('profile.html', existing_profile=existing_profile, comp=existing_company, jobs=existing_jobs, logged_in = current_user.is_authenticated)
+
+##
+@app.route('/profile/edit/user', methods=['GET', 'POST'])
+@login_required
+def edit_user():
+        existing_profile = PersonalProfile.query.filter_by(user_id=current_user.id).first()
+        personal_profile_form = PersonalProfileForm()
+             
+        if personal_profile_form.validate_on_submit() and request.method == 'POST':
+            f_name_edited = request.form['f_name']
+            l_name_edited = request.form['l_name']
+            role_edited = request.form['role']
+            about_edited = request.form['about']
+
+            existing_profile.f_name = f_name_edited
+            existing_profile.l_name = l_name_edited
+            existing_profile.role = role_edited
+            existing_profile.about = about_edited
+            db.session.commit()
+            return redirect(url_for('profile'))
+        return render_template('edit_user.html', form=personal_profile_form, existing_profile=existing_profile, logged_in = current_user.is_authenticated)
+    
+@app.route('/prifile/edit/company', methods=['GET', 'POST'])
+@login_required
+def edit_company():
+        existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
+        company_form = CompanyForm()
+        print(existing_company.industry)
+        if company_form.validate_on_submit() and request.method == 'POST':
+            existing_company.name = request.form['name']
+            existing_company.name_slug = url_friendly(request.form['name'])
+            existing_company.url = request.form['url']
+            existing_company.industry = request.form['industry']
+            existing_company.contact = request.form['contact']
+            existing_company.address = request.form['address']
+            existing_company.about = request.form['about']
+            current_user.company = request.form['name']
+            db.session.commit()
+            return redirect(url_for('profile'))
+
+        return render_template('edit_company.html', form=company_form, existing_company=existing_company, industries=company_industries, current_user=current_user, logged_in = current_user.is_authenticated)
+
+
+@app.route('/profile/manage_jobs', methods=['GET', 'POST'])
+@login_required
+def manage_jobs():
+    existing_profile = load_profile()
+    existing_company = load_company()
+    jobs = load_jobs()
+    existing_jobs = Job.query.filter_by(company_id=existing_company.id).order_by(desc(Job.active)).all()
+    return render_template('manage_jobs.html',
+                           existing_profile=existing_profile,
+                           comp=existing_company,
+                           jobs=existing_jobs,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/profile/manage_jobs/delete/<int:job_id>')
+@login_required
+def delete_job(job_id):
+    existing_company = load_company()
+    job_to_delete = Job.query.filter_by(id=job_id).first()
+    is_active = bool(job_to_delete.active)
+    db.session.delete(job_to_delete)
+    if is_active:
+        existing_company.delete_job()
+    elif is_active == False:
+        existing_company.delete_archived_job()
+    db.session.commit()
+    return redirect(url_for('manage_jobs'))
+
+@app.route('/profile/manage_jobs/hide/<int:job_id>')
+@login_required
+def hide_job(job_id):
+    existing_company = load_company()
+    job_to_hide = Job.query.filter_by(id=job_id).first()
+    job_to_hide.active = False
+    existing_company.archive_published_job()
+    db.session.commit()
+    return redirect(url_for('manage_jobs'))
+
+@app.route('/profile/manage_jobs/activate/<int:job_id>')
+@login_required
+def activate_job(job_id):
+    existing_company = load_company()
+    job_to_activate = Job.query.filter_by(id=job_id).first()
+    job_to_activate.active = True
+    job_to_activate.time_publish = datetime.datetime.now()
+    existing_company.recover_job()
+    db.session.commit()
+    return redirect(url_for('manage_jobs'))
+
+@app.route('/profile/manage_jobs/edit_job/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    job_to_edit = Job.query.filter_by(id=job_id).first()
+    job_edit_form = JobForm()
+    if job_edit_form.validate_on_submit() and request.method == 'POST':
+        job_to_edit.role =request.form['role']
+        job_to_edit.salary= request.form['salary']
+        job_to_edit.start_date = request.form['start_date']
+        job_to_edit.job_type = request.form['job_type']
+        job_to_edit.category = request.form['category']
+        job_to_edit.skills = request.form['skills']
+        job_to_edit.level = request.form['level']
+        job_to_edit.job_info = request.form['job_info']
+        job_to_edit.contact = request.form['contact']
+        db.session.commit()
+        return redirect(url_for('manage_jobs'))
+    return render_template('edit_job.html', form=job_edit_form, job=job_to_edit, levels=job_levels, categories=job_categories, job_types=job_types, logged_in = current_user.is_authenticated)
+
+
+@app.route('/delete_account', methods=['GET', 'POST'])
+@login_required
+def delete_account():
+    delete_form = DeleteForm()
+    if delete_form.validate_on_submit() and request.method == "POST":
+        user_to_delete = User.query.filter_by(id=current_user.id).first()
+        db.session.delete(user_to_delete)
+        # relevant company to delete
+        if bool(Company.query.filter_by(administrator_id=current_user.id).first()):
+            company_to_delete = Company.query.filter_by(administrator_id=current_user.id).first()
+            db.session.delete(company_to_delete)
+        # relevant profile to delete
+        if bool(PersonalProfile.query.filter_by(user_id=current_user.id).first()):
+            profile_to_delete = PersonalProfile.query.filter_by(user_id=current_user.id).first()
+            db.session.delete(profile_to_delete)
+        db.session.commit()
+        logout_user()
+        return redirect(url_for('home'))
+    return render_template('delete_account.html', form=delete_form, logged_in = current_user.is_authenticated)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+@app.route('/companies')
+def companies():
+    companies_from_db = Company.query.all()
+    return render_template('companies.html', companies=companies_from_db, logged_in = current_user.is_authenticated)
+
+@app.route('/company/<int:comp_id>/<name>')
+def company(comp_id, name):
+    company = Company.query.filter_by(id=comp_id).first()
+    company_jobs = Job.query.filter_by(company_id=company.id).where(Job.active==True).all()
+    return render_template('company.html', company=company, company_jobs=company_jobs, logged_in = current_user.is_authenticated)
+
+@app.route('/company/<int:comp_id>/<name>/job/<int:job_id>')
+def job(comp_id, name, job_id):
+    company = Company.query.filter_by(id=comp_id).first()
+    company_jobs = Job.query.filter_by(company_id=company.id).all()
+    job = Job.query.filter_by(id=job_id).first()
+    print(job.time_publish)
+    return render_template('job.html',
+                           company=company,
+                           job=job,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/job/<int:job_id>')
+def job_clean(job_id):
+    job = Job.query.filter_by(id=job_id).first()
+    company = load_company()
+    return render_template('job.html',
+                           job=job,
+                           company=company,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/job/<int:job_id>/apply', methods=['GET', 'POST'])
+def apply(job_id):
+    job_id=job_id
+    apply_form = ApplyForm()
+    company = load_company()
+    job = Job.query.filter_by(id=job_id).first()
+    if request.method == 'POST':
+        return redirect(url_for('apply_success', job_id=job_id))
+
+    return render_template('apply.html',
+                            job_id=job_id,
+                            form=apply_form,
+                            job=job,
+                            company=company,
+                            logged_in = current_user.is_authenticated)
+
+@app.route('/job/<int:job_id>/apply/success', methods=['GET', 'POST'])
+def apply_success(job_id):
+    company=load_company()
+    return render_template('apply_success.html',
+                           company=company,
+                           logged_in = current_user.is_authenticated)
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

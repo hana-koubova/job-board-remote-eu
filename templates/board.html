@@ -1,0 +1,237 @@
+{% extends "base.html" %} {% block content %}
+{% from 'bootstrap5/form.html' import render_field %}
+
+<section id="job-board">
+
+<div class="container-fluid border">
+    <div class="row justify-content-center align-items-center">
+
+        <div class="col-lg-12 col-12 text-center">
+            <h2 class="m-5">Search Remote Jobs</h2>
+        </div>
+    </div>
+    <!--Div to center-->
+    <div class="row d-flex justify-content-center">
+    
+        <div class="col-xxl-10 col-xl-10 col-lg-11 col-md-12 col-sm-12 d-flex job-board-wrap">      
+        
+            <div class="side-tool-div">
+                <form id="category-form" action="{{ url_for('board') }}" method="POST">
+                    {{ category_form.csrf_token(form="category-form") }}
+                    {{ category_form.hidden_tag() }}
+
+                    <div class="form-wrap">
+                        <div class="flex-fill">
+                            <button class="filters-button triangle-buttons" type="button" onclick="openCategory('filters-category')">
+                                Categories
+                                <div class="triangle-buttons__triangle triangle-buttons__triangle--b"></div>
+                            </button>
+                            <h5 class="cat-heading mb-3">Categories</h5>
+                            <div id="filters-category" class="filter-div filters-category">
+                                {% for category in job_categories %}
+                                    {% if category in url_query %}
+                                        {{ category_form[category](checked="checked") }}
+                                    {% else %}
+                                        {{ category_form[category]() }}
+                                    {% endif %}
+                                    {{ category_form[category].label(class="form-label") }}
+                                    <br>
+                                {% endfor %}
+                            <button class="btn-primary btn close-btn" type="button" onclick="closeCategory('filters-category')">Done</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-fill">
+                            <button class="filters-button triangle-buttons" type="button" onclick="openCategory('filters-level')">
+                                Levels
+                                <div class="triangle-buttons__triangle triangle-buttons__triangle--b"></div>
+                            </button>
+                            <h5 class="cat-heading mb-3 mt-3">Levels</h5>
+                            <div id="filters-level" class="filter-div filters-level">
+                                {% for category in job_levels %}
+                                    {% if category in url_query %}
+                                        {{ category_form[category](checked="checked") }}
+                                    {% else %}
+                                        {{ category_form[category]() }}
+                                    {% endif %}
+                                    {{ category_form[category].label(class="form-label") }}
+                                    <br>
+                                {% endfor %}
+                                <button class="btn-primary btn close-btn" type="button" onclick="closeCategory('filters-level')">Done</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-fill">
+                            <button class="filters-button triangle-buttons" type="button" onclick="openCategory('filters-type')">
+                                Job Types
+                                <div class="triangle-buttons__triangle triangle-buttons__triangle--b"></div>
+                            </button>
+                            <h5 class="cat-heading mb-3 mt-3">Job Types</h5>
+                            <div id="filters-type" class="filter-div filters-type">
+                                {% for category in job_types %}
+                                    {% if category in url_query %}
+                                        {{ category_form[category](checked="checked") }}
+                                    {% else %}
+                                        {{ category_form[category]() }}
+                                    {% endif %}
+                                    {{ category_form[category].label(class="form-label") }}
+                                    <br>
+                                {% endfor %}
+                                <button class="btn-primary btn close-btn" type="button" onclick="closeCategory('filters-type')">Done</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-wrap second-line-wrap">
+
+                        
+                        <div class="filters-search">
+                            <h5 class="mt-3">Search Keyword</h5>
+                            {{ category_form.searchfield(value=search_query[0]) }}
+                            <br>
+                            <br>
+                        </div>
+                        
+                        <div class="filters-submit">
+                            {{ category_form.submitcategory(value="Save Filters", class="primary-btn btn") }}
+                        </div>
+                    </div>
+
+                </form>
+                <br>             
+            </div>
+        
+            <div class="flex-grow-1 job-board-dat">
+                {% for job in items_on_page %}
+
+                    <div class="job-thumb d-flex position-relative">
+                        <div class="job-image-wrap bg-white shadow-lg">
+                            <img src="" class="job-image" alt="">
+                        </div>
+    
+                        <div class="job-body d-flex flex-wrap flex-auto align-items-center ms-4">
+                            <div class="mb-3">
+                                <h4 class="job-title mb-lg-0">
+                                    <a href="{{ url_for('job_clean', job_id=job.id) }}" class="job-title-link stretched-link">{{ job.role }}</a>
+                                </h4>
+    
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <p class="m-1 border">{{ job.time_publish }}</p>
+                                    <!--<p class="m-1 border">{{ job.salary }}</p>-->
+                                    <p class="m-1 border">{{ job.level }}</p>
+                                    <p class="m-1 border">{{ job.job_type }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <!--<div class="row m-4 border rounded position-relative">
+                    <h5 class="m-2"><a class="stretched-link text-decoration-none" href="{{ url_for('job_clean', job_id=job.id) }}">{{ job.role }}</a></h5>
+                    <div class="d-flex justify-content-start">
+                        <p class="m-2">Salary: <span class="fw-semibold">{{ job.salary }}</span></p>
+                        <p class="m-2">Level: <span class="fw-semibold">{{ job.level }}</span></p>
+                        <p class="m-2">Category: <span class="fw-semibold">{{ job.category }}</span></p>
+                    </div>
+                </div>-->
+                {% endfor %}
+                {% if jobs_len == 0 %}
+                    <div class="row m-4 border rounded position-relative">
+                        <p>No match</p>
+                    </div>
+                
+                {% endif %}
+
+                <!--Pagination-->
+
+                <div class="container d-flex justify-content-center mt-5">
+                    <div class="row pagination-wrap">
+                        {% if total_pages > 1 %}
+                            <ul class="pagination d-flex justify-content-center border rounded">
+
+                                <div class="col-2 pagination-side">
+                                    {% if page > 1 %}
+                                        <li class="p-2 position-relative d-flex align-items-center">
+                                            <a class="m-2 stretched-link" href="{{ url_for('board', category=url_query, search=search_query, page=page-1) }}">Back</a>
+                                        </li>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col pagination-center d-flex justify-content-center">
+                                    {% for page_num in total_pages_list %}
+                                        {% if page_num == page %}
+                                            <li class="p-2 position-relative d-flex align-items-center pagination-disabled">
+                                                <p class="m-2">{{ page_num }}</p>
+                                            </li>
+                                        {% else %}
+                                            <li class="p-2 position-relative d-flex align-items-center">
+                                                <a class="stretched-link" href="{{ url_for('board', category=url_query, search=search_query, page=page_num) }}">{{ page_num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-2 pagination-side">
+                                    {% if page < total_pages %}
+                                        <li class="p-2 position-relative d-flex align-items-center">
+                                            <a class="m-2 stretched-link" href="{{ url_for('board', category=url_query, search=search_query, page=page+1) }}">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </div>
+                            </ul> 
+                        {% endif %}
+                    </div>          
+                </div>
+                <!--end of Pagination-->
+
+            </div>
+        </div>   
+    </div>
+</div>
+
+
+<div id="black-div"></div>
+
+</section>
+
+<script>
+    function openCategory(id) {
+        //document.getElementById("filters-category").style.display = "block";
+        //document.getElementById("filters-category").style.cssText = "border: 1px border yellow;";
+        //document.getElementById("filters-category").style.cssText = "display: block; border: 1px solid red";
+        document.getElementById(id).style.cssText = `
+            display: block;
+            position: fixed;
+            animation: fade_in_show 0.5s;
+            z-index: 9;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+            background-color: white;
+            width: 80%;
+            padding: 10px;
+            font-size: 1.3em;
+            max-height: 90%;
+            overflow: scroll;
+            `;
+        document.getElementById('black-div').style.display = 'block';
+    }
+
+    function closeCategory(id) {
+        document.getElementById(id).style.removeProperty('position')
+        document.getElementById(id).style.removeProperty('z-index')
+        document.getElementById(id).style.removeProperty('top')
+        document.getElementById(id).style.removeProperty('left')
+        document.getElementById(id).style.removeProperty('transform')
+        document.getElementById(id).style.removeProperty('background-color')
+        document.getElementById(id).style.removeProperty('width')
+        document.getElementById(id).style.removeProperty('padding')
+        document.getElementById(id).style.removeProperty('font-size')
+        document.getElementById(id).style.removeProperty('max-height')
+        document.getElementById(id).style.removeProperty('overflow')
+        document.getElementById(id).style.removeProperty('animation')
+        document.getElementById(id).style.removeProperty('display')
+        document.getElementById('black-div').style.display = 'none';
+    }
+</script>
+
+{% endblock %}
+

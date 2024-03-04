@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+
+<h1 class="text-center p-5">Register</h1>
+<div class="row d-flex justify-content-center p-5">
+    {{ render_form(form) }}
+</div>
+{% endblock %}

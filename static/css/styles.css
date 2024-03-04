@@ -1,0 +1,645 @@
+/*---------------------------------------
+  CUSTOM PROPERTIES ( VARIABLES )             
+-----------------------------------------*/
+:root {
+    --white-color:                  #ffffff;
+    --primary-color:                #5d52ba;
+    --secondary-color:              #0dcaf0;
+    --section-bg-color:             #f0f8ff;
+    --section-bg-color2:            #f5f7fa;
+    --custom-btn-bg-color:          #f65129;
+    --social-icon-link-bg-color:    #7f73eb;
+    --dark-color:                   #000000;
+    --p-color:                      #717275;
+    --border-color:                 #e9eaeb;
+  
+    --body-font-family:             'League Spartan', sans-serif;
+  }
+  
+  body {
+    background-color: var(--white-color);
+    font-family: var(--body-font-family); 
+  }
+
+  /*---------------------------------------
+  TYPOGRAPHY               
+-----------------------------------------*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--dark-color);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.5px;
+}
+
+h1,
+h2 {
+  letter-spacing: -1.5px;
+}
+
+p {
+  color: var(--p-color);
+  font-size: var(--p-font-size);
+  font-weight: var(--font-weight-light);
+}
+
+a {
+    text-decoration: none;  
+}
+
+nav a:hover, footer a:hover {
+    color: var(--custom-btn-bg-color) !important;
+}
+
+
+/*---------------------------------------
+  SECTION               
+-----------------------------------------*/
+
+section {
+    background-color: var(--section-bg-color2);
+}
+
+.section-padding {
+    padding-top: 100px;
+    padding-bottom: 100px;
+  }
+  
+  .section-overlay {
+    background: rgba(0, 0, 0, 0.85);
+    background: var(--custom-btn-bg-color);
+    opacity: 0.85;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .section-overlay + .container {
+    position: relative;
+  }
+  
+.nav-to-the-right {
+    display: flex;
+    justify-content: end;
+}
+
+/*----------------------------------
+            BUTTONS
+---------------------------------*/
+
+.orange-btn {
+    background: var(--custom-btn-bg-color);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-large);
+    color: var(--white-color);
+    font-size: var(--btn-font-size);
+    font-weight: var(--font-weight-normal);
+    line-height: normal;
+    padding: 15px 20px;
+  }
+
+.orange-btn:hover {
+    background: var(--secondary-color);
+    color: var(--white-color);
+  }
+
+.primary-btn {
+    background: var(--primary-color);
+    border: none;
+    color: var(--white-color);
+    font-size: var(--p-font-size);
+    font-weight: var(--font-weight-normal);
+    transition: all 0.3s;
+    margin-bottom: 24px;
+  }
+  
+.primary-btn:hover {
+    background: var(--secondary-color);
+    border-color: transparent;
+  }
+
+
+.white-btn {
+    color: white;
+    border: 1px solid white;
+    border-radius: 5px;
+    font-size: 1.2em;
+}
+
+.white-btn:hover {
+    background-color: white;
+}
+
+
+
+
+/*----------------------------------
+            Tooltips
+---------------------------------*/
+
+.div-tooltip {
+    margin: 3px;
+    position: relative;
+    display: inline-block;
+  }
+
+/* position and shape of toolpit */
+.div-tooltip .tooltiptext {
+    visibility: hidden;
+    width: 150px;
+    background-color: #e9e9e9;
+    color: #494949;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    text-align: left;
+    z-index: 1;
+
+    /* position of toolpit */
+    top: -5px;
+    left: 125%;
+    
+    margin-left: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+.tooltiptext {
+    font-size: 0.8em;
+    padding: 5px;
+}
+
+/* position and shape of arrow */
+.div-tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    
+    top: 8%;
+    right: 100%;
+    
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #555 transparent transparent;
+  }
+  
+  .div-tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    cursor: pointer;
+  }
+
+.div-tooltip:hover {
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 800px) {
+    .div-tooltip .tooltiptext {
+        width: 300px;
+        top: 135%;
+        /*left: 20px;*/
+        margin-left: -280px;
+    }
+
+    .div-tooltip .tooltiptext::after {
+        top: -50%;
+        right: 50%;
+
+        left: 89%;
+        bottom: 100%;
+        
+        margin-left: -5px;
+
+        border-color: transparent transparent #555 transparent;
+    }
+}
+
+
+
+/*---------------------------------------
+  HERO              
+-----------------------------------------*/
+
+.hero-section {
+    background-image: url('../images/work-from-home.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+    position: relative;
+    padding-top: 150px;
+    padding-bottom: 150px;
+  }
+  
+  .hero-section .section-overlay {
+    background: var(--primary-color);
+  }
+  
+  .hero-section .custom-border-btn {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+  }
+  
+  .hero-section .custom-border-btn:hover {
+    background: var(--secondary-color);
+    color: var(--white-color);
+  }
+  
+  .hero-form {
+    background: var(--social-icon-link-bg-color);
+    border-radius: var(--border-radius-small);
+    padding: 40px;
+  }
+  
+  .hero-form .form-control {
+    padding-bottom: 10px;
+  }
+  
+  .hero-form button[type="submit"] {
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+  
+  .hero-form .input-group-text i {
+    position: relative;
+    top: 2px;
+  }
+  
+  .hero-section .badge {
+    background: transparent;
+    color: var(--white-color);
+  }
+  
+  .hero-section .badge:hover {
+    background: var(--white-color);
+    color: var(--primary-color);
+  }
+  
+  .badge {
+    background: var(--section-bg-color);
+    border: 1px solid var(--white-color);
+    border-radius: var(--border-radius-medium);
+    color: var(--primary-color);
+    font-weight: var(--font-weight-normal);
+    line-height: normal;
+    margin-right: 5px;
+    margin-left: 5px;
+    padding: 8px 12px;
+    padding-bottom: 6px;
+  }
+  
+  .badge-level {
+    background: var(--primary-color);
+    color: var(--white-color);
+  }
+  
+  .badge:hover {
+    background: var(--custom-btn-bg-color);
+    color: var(--white-color);
+  }
+
+@media only screen and (max-width: 800px) {
+
+    .hero-section-text {
+        text-align: center;
+    }
+
+    .hero-form {
+        text-align: center;
+    }
+
+    .hero-section {
+        background-position: left;
+    }  
+
+  }
+
+/*---------------------------
+        PAGINATION
+---------------------------*/
+
+.pagination {
+    list-style: none;
+    }
+
+.pagination-wrap {
+    width: 50%;
+    }
+
+.pagination a {
+    color: var(--p-color);
+    font-size: 1.2em;
+    transition-duration: 200ms;
+    text-decoration: none;
+    }
+
+.pagination a:hover {
+    color: var(--custom-btn-bg-color);
+    transition-duration: 200ms;
+    }
+
+.pagination li {
+    display: list-item;
+    }
+
+.pagination-disabled {
+    font-size: 1.2em;
+    color: currentColor;
+    opacity: 0.5;
+}
+
+.pagination-disabled:hover {
+    color: currentColor;
+    opacity: 0.5;
+}
+
+@media only screen and (max-width: 800px) {
+    .pagination-wrap {
+        width: 90%;
+        }
+    }
+
+
+  /*---------------------------------------
+  CATEGORIES              
+-----------------------------------------*/
+
+
+.shadow-light {
+    -webkit-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
+    -moz-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
+    box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
+}
+
+.categories-block {
+    background: var(--white-color);
+    border-radius: var(--border-radius-large);
+    width: 150px;
+    height: 150px;
+    margin: auto;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    transition: all 0.5s;
+  }
+
+  .categories-section {
+    background-color: #f5f7fa;
+  }
+
+  .categories-block:hover {
+    -webkit-box-shadow: 1px 1px 10px 0px rgba(191,191,191,1);
+    -moz-box-shadow: 1px 1px 10px 0px rgba(191,191,191,1);
+    box-shadow: 1px 1px 10px 0px rgba(191,191,191,1);
+  }
+  
+  .categories-block-title {
+    color: var(--dark-color);
+    /*font-size: var(--copyright-font-size);*/
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 0.8125rem;
+    top: 1.0625rem;
+    height: 1.0625rem;
+    width: 0.8125rem;
+    text-align: right;
+    -o-object-fit: contain;
+    object-fit: contain;
+    -o-object-position: center center;
+    object-position: center center;
+    opacity: 0.5;
+}
+
+/*-------------------------------------
+   JOB BOARD
+-----------------------------------*/
+
+.job-board-dat {
+    margin: 10px;
+    
+}
+
+
+@media only screen and (max-width: 600px) {
+    .job-board-dat {
+      margin: 0;
+    }
+
+  }
+
+  /*---------------------------------------
+  JOB CARD           
+-----------------------------------------*/
+
+.recent-jobs-bottom .custom-btn {
+    font-size: var(--h5-font-size);
+    padding: 25px 50px;
+  }
+  
+  .job-listings-page .hero-form .badge:hover {
+    background: var(--primary-color);
+  }
+  
+  .job-thumb {
+    border-radius: var(--border-radius-small);
+    margin-bottom: 25px;
+    padding: 25px;
+    transition: all 0.5s ease;
+    background: var(--white-color);
+  }
+  
+  .job-thumb:hover {
+    background: var(--white-color);
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175);
+  }
+  
+  .job-title-link {
+    color: var(--dark-color);
+  }
+
+  
+  .job-image-wrap {
+    border-radius: var(--border-radius-large);
+    width: 80px;
+    min-width: 80px;
+    height: 80px;
+  }
+  
+  .job-image {
+    display: block;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  
+  .job-body {
+    flex: auto;
+  }
+
+/*-------------------------------
+   JOB BOARD FILTERS TOOL DIVS
+-------------------------------*/
+
+.form-label {
+    margin-bottom: 0;
+}
+
+.side-tool-div {
+    margin: 10px;
+    padding: 10px;
+}
+
+@media only screen and (min-width: 801px) {
+    .filters-button {
+        display: none !important;
+    }
+
+    .close-btn {
+        display: none;
+    }
+
+  }
+
+@media only screen and (max-width: 800px) {
+
+    .job-board-wrap {
+        flex-direction: column;
+    }
+
+    .form-wrap {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .second-line-wrap {
+        align-items: center;
+        margin-top: 5px;
+    }
+
+    .side-tool-div {
+        padding: 1px;
+        margin: 1px;
+    }
+
+    .filter-div {
+        display: none;
+    }
+
+    .cat-heading {
+        display: none;
+    }
+
+    .second-line-wrap {
+        display: flex;
+        align-items: end;
+    }
+
+}
+
+.filters-button {
+    background-color: #777;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    border-radius: 1px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+  }
+
+.filters-button:hover {
+    background-color: #353535;
+  }
+
+.triangle-buttons {
+    /* Center the content */
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+    /* Spacing */
+    padding: 0.5rem;
+}
+
+.triangle-buttons__triangle {
+    border-style: solid;
+
+    /* Size */
+    height: 0px;
+    width: 0px;
+}
+
+.triangle-buttons__triangle--b {
+    border-color: #d1d5db transparent transparent;
+    border-width: 0.5rem 0.5rem 0;
+    margin: 5px;
+}
+
+/* Popup test */
+
+#popup {
+    display: none;
+    position: fixed;
+    bottom: 50px;
+    right: 100px;
+    border: 3px solid #f1f1f1;
+    z-index: 9;
+  }
+
+#black-div {
+    display: none;
+    position: fixed;
+    z-index: 5;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    background-color: black;
+    opacity: 0.5;
+    width: 99%;
+    height: 99%;
+}
+
+.close-btn {
+    width: 100px;
+    margin: 5px;
+}
+
+@keyframes fade_in_show {
+    0% {
+         opacity: 0;
+    }
+
+    100% {
+         opacity: 1;
+    }
+}
+
+
+  /*---------------------------------------
+  CTA               
+-----------------------------------------*/
+.cta-section {
+    background-image: url('../images/millennial-group-young-businesspeople.jpg');
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: cover;
+    position: relative;
+    padding-top: 150px;
+    padding-bottom: 75px;
+  }
+
+
+
+
+

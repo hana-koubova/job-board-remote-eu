@@ -1,0 +1,184 @@
+{% extends "base.html" %} {% block content %}
+
+<section class="hero-section d-flex justify-content-center align-items-center">
+    <div class="section-overlay"></div>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-6 col-md-6 col-12 mb-5 mb-lg-0">
+                <div class="hero-section-text mt-5">
+                    <h6 class="text-white">Are you looking for your dream job?</h6>
+
+                    <h1 class="hero-title text-white mt-4 mb-4">Discover Remote Opportunities <br> Across Europe</h1>
+
+                    <a href="{{ url_for('board') }}" class="custom-btn custom-border-btn btn">Browse Categories</a>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-6 col-12 inner-hero-div">
+                <form class="custom-form hero-form" action="{{ url_for('home') }}" method="POST" role="form">
+                    {{ form.csrf_token }}
+                    <h3 class="text-white mb-3">Search your dream job</h3>
+
+                    <div class="row">
+                        <div class="col-12 m-3">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+                                    </svg>
+                                </span>
+
+                                <input type="text" name="job-title" id="job-title" class="form-control" placeholder="Job Title" required>
+                            </div>
+                        </div>
+
+                        <div class="col-12 m-3">
+                            <button type="submit" class="form-control primary-btn">
+                                Find a job
+                            </button>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap align-items-center mt-4 mt-lg-0">
+                                <span class="text-white mb-lg-0 mb-md-0 me-2">Popular keywords:</span>
+
+                                <div>
+                                    <a href="{{ url_for('board', search='developer') }}" class="badge rounded">Developer</a>
+
+                                    <a href="{{ url_for('board', search='web design') }}" class="badge rounded">Web Design</a>
+
+                                    <a href="{{ url_for('board', search='customer support') }}" class="badge rounded">Customer support</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="categories-section section-padding" id="categories-section">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+
+            <div class="col-lg-12 col-12 text-center">
+                <h2 class="mb-5">Browse by <span>Categories</span></h2>
+            </div>
+        </div>
+
+        <div class="row justify-content-center align-items-center">
+            {% for category in job_categories %}
+            <div class="col-lg-2 col-md-4 col-6">
+                <div class="categories-block shadow-light">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search search-icon" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                      </svg>
+                    <a href="{{ category[1] }}" class="d-flex flex-column justify-content-center align-items-center h-100">
+                        <h5 class="categories-block-title">{{category[0]}}</h5>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+
+        </div>
+    </div>
+</section>
+
+
+<section class="job-section job-featured-section section-padding" id="job-section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-6 col-12 text-center mx-auto mb-4">
+                <h2>Featured Jobs</h2>
+
+                <p><strong>Over 10k opening jobs</strong> Feel free to download and use our free HTML templates from Tooplate website.</p>
+            </div>
+
+            <div class="job-thumb d-flex">
+                <div class="job-image-wrap bg-white shadow-lg">
+                    <img src="images/logos/apple.png" class="job-image img-fluid" alt="">
+                </div>
+
+                <div class="job-body d-flex flex-wrap flex-auto align-items-center ms-4">
+                    <div class="mb-3">
+                        <h4 class="job-title mb-lg-0">
+                            <a href="job-details.html" class="job-title-link">Business Director</a>
+                        </h4>
+
+                        <div class="d-flex flex-wrap align-items-center">
+                            <p class="job-location mb-0">
+                                <i class="custom-icon bi-geo-alt me-1"></i>
+                                California, USA
+                            </p>
+
+                            <p class="job-date mb-0">
+                                <i class="custom-icon bi-clock me-1"></i>
+                                1 day ago
+                            </p>
+
+                            <p class="job-price mb-0">
+                                <i class="custom-icon bi-cash me-1"></i>
+                                $90k
+                            </p>
+
+                            <div class="d-flex">
+                                <p class="mb-0">
+                                    <a href="job-listings.html" class="badge badge-level">Senior</a href="job-listings.html">
+                                </p>
+
+                                <p class="mb-0">
+                                    <a href="job-listings.html" class="badge">Full Time</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+
+        
+        </div>
+    </div>
+</section>
+
+
+
+
+<section class="cta-section">
+    <div class="section-overlay"></div>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-6 col-10">
+                <h2 class="text-white mb-2">Join the Remote Revolution in Europe</h2>
+
+                <p class="text-white">We are building seamless remote work solutions for European companies. Try it today and find your next star employee.</p>
+            </div>
+
+            <div class="col-lg-4 col-12 ms-auto">
+                <div class="custom-border-btn-wrap d-flex align-items-center mt-lg-4 mt-2">
+                    {% if logged_in %}
+                    <a href="{{ url_for('post_job') }}" class="white-btn btn m-4">Post a job</a>
+                    {% else %}
+                    <a href="#" class="white-btn btn m-4">Create an account</a>
+                    <a href="#" class="white-btn btn m-4">Log In</a>
+                    {% endif %}
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

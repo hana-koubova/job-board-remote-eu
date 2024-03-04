@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container w-75">
+    <br>
+    <br>
+    <div class="row m-5">
+        <h2 class="text-center">Are you sure you want to delete your account?</h2>
+    </div>
+    <div class="row m-5 d-flex flex-column align-items-center">
+        <h4 class="text-center">All relevant information will be deleted as well:</h4>
+        <div class="row w-25">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Personal profile</li>
+            <li class="list-group-item">Company profile</li>
+            <li class="list-group-item">Job listings</li>
+        </ul>
+        </div>
+    </div>
+
+    <form action="{{ url_for('delete_account') }}", method="POST" class="d-flex justify-content-center">
+        {{ form.csrf_token }}
+        <!--{{ form.reason.label(class="form-label") }}
+        <br>
+        {{ form.reason(class_="form-control") }}-->
+        <br>
+        <div class="row w-50">
+        {{ form.submit(class="btn btn-outline-danger") }}
+        </div>
+
+    </form>
+    <br>
+    <br>
+</div>
+
+
+
+{% endblock %}

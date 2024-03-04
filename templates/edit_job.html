@@ -1,0 +1,105 @@
+{% extends "base.html" %} {% block content %}
+{% from 'bootstrap5/form.html' import render_form %}
+<h1>Edit Job {{ job.role }}</h1>
+
+<div class="container w-75 flex-column border rounded p-3">
+
+    <form class="edit_job" method="POST" action="{{ url_for('edit_job', job_id = job.id) }}">     
+        
+        {{ form.csrf_token }}
+        {{ form.role.label(class="form-label") }}
+        <br>
+        {{ form.role(value=job.role, class_="form-control") }}
+        <br>
+        {{ form.salary.label(class="form-label") }}
+        <br>
+        {{ form.salary(value=job.salary, class_="form-control") }}
+        <br>
+        {{ form.start_date.label(class="form-label") }}
+        <br>
+        {{ form.start_date(value=job.start_date, class_="form-control") }}
+        <br>
+
+        <!--Drop dow for TYPE with selected value-->
+        <label for="job_type" class="form-label">Type of Job</label>
+        <br>
+        <select name="job_type" id="job_type" class="form-control">
+        {% for job_type in job_types %}
+            {% if job.job_type == job_type %}
+                <option selected>{{ job_type }}</option>
+            {% else %}
+                <option>{{ job_type }}</option>
+            {% endif %}
+
+        {% endfor %}
+        </select>
+        <br>
+        <!--End of custom select field-->
+
+        <!--Drop dow for CATEGORY with selected value-->
+        <label for="category" class="form-label">Category</label>
+        <br>
+        <select name="category" id="category" class="form-control">
+        {% for category in categories %}
+            {% if job.category == category %}
+                <option selected>{{ category }}</option>
+            {% else %}
+                <option>{{ category }}</option>
+            {% endif %}
+
+        {% endfor %}
+        </select>
+        <br>
+        <!--End of custom select field-->
+
+
+        {{ form.skills.label(class="form-label") }}
+        <br>
+        {{ form.skills(value=job.skills, class_="form-control") }}
+        <br>
+
+        <!--Drop dow for LEVEL with selected value-->
+        <label for="level" class="form-label">Level</label>
+        <br>
+        <select name="level" id="level" class="form-control">
+        {% for level in levels %}
+            {% if job.level == level %}
+                <option selected>{{ level }}</option>
+            {% else %}
+                <option>{{ level }}</option>
+            {% endif %}
+
+        {% endfor %}
+        </select>
+        <br>
+        <!--End of custom select field-->
+
+        {{ form.contact.label(class="form-label") }}
+        <br>
+        {{ form.contact(value=job.contact, class_="form-control") }}
+        <br>
+        {{ form.job_info.label(class="form-label") }}
+        <br>
+        {{ ckeditor.create(value=job.job_info, name="job_info") }}
+        <br>
+        <br>
+        {{ form.submit(value="Edit Job", class="btn btn-primary") }}
+        
+    </form>
+    
+</div>
+{{ ckeditor.load() }}
+{{ ckeditor.config(name="job_info",
+                    custom_config="
+                        scayt_autoStartup:true,
+                        toolbar: [
+                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
+                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
+                            { name: 'editing', items: [ 'Scayt' ]}
+                    
+                        ]") }}
+
+
+</div>
+
+{% endblock %}

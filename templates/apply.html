@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+
+<section id="apply_job">
+<div class="container">
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <h1 class="my-5">Application for {{ job.role }}</h1>
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center mb-5">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <p>Company: {{ company.name }}</p>
+        </div>
+        
+    </div>
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+        <form action="{{ url_for('apply_success', job_id=job_id) }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <div class="row">
+                <div class="col">
+                    <!--First name-->
+                    <input type="text" class="form-control" placeholder="First name" aria-label="First name" required>
+                </div>
+                <div class="col">
+                    <!--Last name-->
+                    <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" required>
+                </div>
+            </div>
+            <br>
+            <div class="input-group mb-3">
+                <!--Email-->
+                <span class="input-group-text" id="basic-addon1">@</span>
+                <input type="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="basic-addon1" required>
+            </div>
+            <br>
+
+
+            <div class="mb-3">
+                <!--File upload-->
+                <label for="formFile" class="form-label">Attach your CV (.pdf)</label>
+                <input class="form-control" type="file" id="formFile">
+            </div>
+            <br>
+
+            <div class="input-group">
+                <!--Say Hi-->
+                <span class="input-group-text">Say Hi</span>
+                <textarea class="form-control" aria-label="With textarea"></textarea>
+            </div>
+
+            <br>
+            <div class="form-check">
+                <!--Agree-->
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
+                <label class="form-check-label" for="flexCheckDefault">
+                  I Agree to share provided information with {{company.name}}.
+                </label>
+            </div>
+            <br>
+            <!--Submit-->
+            <button type="submit" class="primary-btn form-control">Submit Application</button>
+        </form>
+        </div>
+    </div>
+</div>
+</section>
+
+
+{% endblock %}

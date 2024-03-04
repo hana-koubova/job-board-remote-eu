@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+{% block content %}
+<section id="post_job">
+<div class="container">
+    
+    <!--{% if not logged_in: %}
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <h2 class="text-center p-5">Looks like you are not logged out
+            </h2>
+        </div>
+    </div>
+
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+
+            <p class="text-center p-3">You have to register / login to post a job.</p>
+            <div class="d-flex justify-content-center">
+                <a class="p-3" href="{{ url_for('register') }}">Register</a>
+                <a class="p-3" href="{{ url_for('login') }}">Login</a>
+            </div>
+        </div>
+    </div>
+
+    {% else: %}-->
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+            <h2 class="text-center p-5">New Job Listing</h2>
+            <p>{{ company.name }}</p>
+        </div>
+    </div>
+
+    <div class="row d-flex justify-content-center mb-3">
+        <div class="col-lg-6 col-md-10 col-sm-12">
+
+            <form class="edit_form" method="POST" action="{{ url_for('post_job') }}">     
+        
+                {{ form.csrf_token }}
+                <!--Role / Title-->
+                {{ form.role(class_="form-control", placeholder="Role / Title") }}
+                <br>
+                <div class="row d-flex justify-content-center">
+                    <!--Salary-->
+                    <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">€</span>
+                            {{ form.salary(class_="form-control", placeholder="Salary") }}
+                        </div>
+                    </div>
+                    <br>
+                    <!--Start Date-->
+                    <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                        {{ form.start_date(class_="form-control", placeholder="Start Date") }}
+                        
+                    </div>
+                </div>
+
+                <div class="row d-flex justify-content-center">
+                    <!--Job Type-->
+                    
+                    <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Job Type</span>
+                            {{ form.job_type(class_="form-control form-select") }}
+                        </div>
+                    </div>
+                    
+                    <!--Category-->
+                    <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Category</span>
+                        {{ form.category(class_="form-control form-select") }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!--Skills-->
+                
+                {{ form.skills(class_="form-control", placeholder="Key Skills") }}
+                <br>
+                <div class="row d-flex justify-content-center">
+                    <!--Level-->
+                    <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Level</span>
+                            {{ form.level(class_="form-control form-select") }}
+                        </div>
+                    </div>
+                    
+                    <!--Contact-->
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <!--{{ form.contact.label(class="form-label mb-2") }}
+                        <br>-->
+                        {{ form.contact(class_="form-control", placeholder="Contact Person") }}
+                        <br>
+                    </div>
+                </div>
+
+                <!--Job Info-->
+                
+                {{ ckeditor.create(value="Job Description", name="job_info") }}
+                <br>
+                <!--Active or Archive-->
+                
+                <div class="d-flex align-items-end">
+                    {% for subfield in form.active %}
+                        <div class="m-1">
+                            {{ subfield }} {{ subfield.label }}
+                        </div>
+                    {% endfor %}
+                    <div class="m-1">
+                        <div class="div-tooltip col">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#808080" class="bi bi-question-circle" viewBox="0 0 16 16" data-toggle="tooltip" data-placement="right" title="Tooltip on right">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286m1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94"/>
+                            </svg>
+                            <span class="tooltiptext">{{ toolpits.publish_or_hide }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+
+                
+                    
+                
+        
+                <br>
+                <br>
+                {{ form.submit(class="primary-btn form-control") }}
+        
+            </form>
+        </div>
+    </div>
+    
+</div>
+{{ ckeditor.load() }}
+{{ ckeditor.config(name="job_info",
+                    custom_config="
+                        scayt_autoStartup:true,
+                        toolbar: [
+                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
+                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
+                            { name: 'editing', items: [ 'Scayt' ]}
+                    
+                        ]") }}
+
+
+    <!--{% endif %}-->
+</div>
+</section>
+
+
+
+{% endblock %}

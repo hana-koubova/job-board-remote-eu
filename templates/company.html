@@ -1,0 +1,53 @@
+{% extends "base.html" %} {% block content %}
+<div class="container m-5 d-flex flex-column align-items-center">
+
+    <div class="row w-75 d-flex">
+        <div class="col-lg-6 col-sm-12">
+            <h1>{{ company.name }}</h>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+            <img src="/static/images/placeholder-image.jpg" width="200px">
+        </div>
+    </div>
+
+    <div class="row w-75 font-monospace m-5">
+        <div class="col-lg-8 col-sm-12">
+            <br>
+            {{ company.about|safe }}
+            <br>
+        </div>
+        <div class="col-lg-4 col-sm-12 border rounded">
+            <br>
+            <p>Location: {{ company.address }}</p>
+            <p><a href="{{ company.url }}">Website</a></p>
+            <p>Contact: {{ company.contact }}</p>
+        </div>
+    </div>
+    <hr class="w-75">
+</div>
+
+<div class="container m-5 d-flex flex-column align-items-center">
+    <h3>Jobs ({{company.num_of_jobs }})</h3>
+
+    <div class="container">
+        <div class="row justify-content-md-center">
+        {% for job in company_jobs %}
+        <div class="m-2 col-sm-12 col-md-4 col-lg-3 p-3">
+            <div class="card">
+            <img src="static/images/placeholder-image.jpg" class="card-img-top" alt="">
+            <div class="card-body">
+                <h5 class="card-title">{{ job.role }}</h5>
+                <p class="card-text">{{ (job.job_info[:80])|safe }}...</p>
+                <a href="{{ url_for('job', comp_id=company.id, name=company.name_slug, job_id=job.id) }}" class="btn btn-primary">View</a>
+            </div>
+            </div>
+        </div>
+    
+        {% endfor %}
+        </div>
+    </div>
+    <hr class="w-75">
+</div>
+
+
+{% endblock %}
