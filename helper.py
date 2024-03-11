@@ -26,6 +26,6 @@ def load_jobs():
 def get_categories(input):
     result=[]
     for item in input:
-        if item != "csrf_token" and item != 'submitcategory' and item != 'searchfield':
+        if item != "csrf_token" and item != 'submitcategory' and item != 'searchfield' and item != 'submitindustry':
             result.append(item)
     return result

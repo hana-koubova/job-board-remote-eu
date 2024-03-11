@@ -1,27 +1,146 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base_profile.html" %}
 {% from 'bootstrap5/form.html' import render_form %}
-<h1>Edit Job {{ job.role }}</h1>
 
-<div class="container w-75 flex-column border rounded p-3">
+{% block profile_content %}
 
-    <form class="edit_job" method="POST" action="{{ url_for('edit_job', job_id = job.id) }}">     
+<section>
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex mt-2">
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('job_listings') }}"><p><b>Job listings</b></p></a>
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('edit_job', job_id = job.id) }}"><p><b>Edit job</b></p></a>
+        </div>
+
+        <div class="row d-flex justify-content-center mb-3 mt-5 pt-5">
+            <div class="col-lg-10 col-md-12 col-sm-12">
+
+    <form class="edit_job" method="POST" action="{{ url_for('job_listings') }}">
+        <p>{{job.id}}</p>  
         
         {{ form.csrf_token }}
-        {{ form.role.label(class="form-label") }}
+        <!--Role / Title-->
+        <div class="col-lg-12 col-md-12 col-sm-12 mb-4">
+            <div class="input-group">
+                <span class="input-group-text" id="basic-addon1">Role</span>
+                {{ form.role(value=job.role, class_="form-control") }}
+            </div>
+        </div>
+
+        <div class="row d-flex justify-content-center">
+            <!--Salary-->
+            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">Salary €</span>
+                    {{ form.salary(value=job.salary, class_="form-control") }}
+                </div>
+            </div>
+            <br>
+            <!--Start Date-->
+            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">Start Date</span>
+                    {{ form.start_date(value=job.start_date, class_="form-control") }}
+                </div>
+            </div>
+        </div>
+
+        <div class="row d-flex justify-content-center">
+            <!--Job Type-->
+            
+            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">Job Type</span>
+                    <select name="category" id="category" class="form-control form-select">
+                        {% for job_type in job_types %}
+                            {% if job.job_type == job_type %}
+                                <option selected>{{ job_type }}</option>
+                            {% else %}
+                                <option>{{ job_type }}</option>
+                            {% endif %}
+    
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!--Category-->
+            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">Category</span>
+                    <select name="category" id="category" class="form-control form-select">
+                        {% for category in categories %}
+                            {% if job.category == category %}
+                                <option selected>{{ category }}</option>
+                            {% else %}
+                                <option>{{ category }}</option>
+                            {% endif %}
+    
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+
+            <!--Skills-->
+            <div class="col-lg-12 col-md-12 col-sm-12 mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1">Skills</span>
+                    {{ form.skills(value=job.skills, class_="form-control") }}
+                </div>
+            </div>
+
+            <div class="row d-flex justify-content-center">
+                <!--Level-->
+                <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                    <div class="input-group">
+                        <span class="input-group-text" id="basic-addon1">Level</span>
+                        <select name="level" id="level" class="form-control form-select">
+                            {% for level in levels %}
+                                {% if job.level == level %}
+                                    <option selected>{{ level }}</option>
+                                {% else %}
+                                    <option>{{ level }}</option>
+                                {% endif %}
+        
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!--Contact-->
+                <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="input-group">
+                        <span class="input-group-text" id="basic-addon1">Contact</span>
+                        {{ form.contact(value=job.contact, class_="form-control") }}
+                    </div>
+                </div>
+            </div>
+
+       
+            
+
+
+
+
+
+
+        <!--{{ form.role.label(class="form-label") }}
         <br>
         {{ form.role(value=job.role, class_="form-control") }}
-        <br>
-        {{ form.salary.label(class="form-label") }}
+        <br>-->
+        <!--{{ form.salary.label(class="form-label") }}
         <br>
         {{ form.salary(value=job.salary, class_="form-control") }}
         <br>
         {{ form.start_date.label(class="form-label") }}
         <br>
         {{ form.start_date(value=job.start_date, class_="form-control") }}
-        <br>
+        <br>-->
 
         <!--Drop dow for TYPE with selected value-->
-        <label for="job_type" class="form-label">Type of Job</label>
+        <!--<label for="job_type" class="form-label">Type of Job</label>
         <br>
         <select name="job_type" id="job_type" class="form-control">
         {% for job_type in job_types %}
@@ -33,11 +152,11 @@
 
         {% endfor %}
         </select>
-        <br>
+        <br>-->
         <!--End of custom select field-->
 
         <!--Drop dow for CATEGORY with selected value-->
-        <label for="category" class="form-label">Category</label>
+        <!--<label for="category" class="form-label">Category</label>
         <br>
         <select name="category" id="category" class="form-control">
         {% for category in categories %}
@@ -49,17 +168,17 @@
 
         {% endfor %}
         </select>
-        <br>
+        <br>-->
         <!--End of custom select field-->
 
 
-        {{ form.skills.label(class="form-label") }}
+        <!--{{ form.skills.label(class="form-label") }}
         <br>
         {{ form.skills(value=job.skills, class_="form-control") }}
-        <br>
+        <br>-->
 
         <!--Drop dow for LEVEL with selected value-->
-        <label for="level" class="form-label">Level</label>
+        <!--<label for="level" class="form-label">Level</label>
         <br>
         <select name="level" id="level" class="form-control">
         {% for level in levels %}
@@ -71,19 +190,22 @@
 
         {% endfor %}
         </select>
-        <br>
+        <br>-->
         <!--End of custom select field-->
 
-        {{ form.contact.label(class="form-label") }}
+        <!--{{ form.contact.label(class="form-label") }}
         <br>
         {{ form.contact(value=job.contact, class_="form-control") }}
         <br>
         {{ form.job_info.label(class="form-label") }}
+        <br>-->
+        <br>
         <br>
         {{ ckeditor.create(value=job.job_info, name="job_info") }}
+        
         <br>
         <br>
-        {{ form.submit(value="Edit Job", class="btn btn-primary") }}
+        {{ form.submit(value="Edit Job", class="primary-btn form-control") }}
         
     </form>
     

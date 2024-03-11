@@ -1,0 +1,75 @@
+
+{% extends "base_profile.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+
+{% block profile_content %}
+
+
+<section>
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex mt-2">
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('user') }}"><p><b>User</b></p></a>
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('edit_user') }}"><p><b>Edit User</b></p></a>
+        </div>
+
+        <!--<div class="row d-flex justify-content-center mb-3">
+            <div class="col-lg-6 col-md-10 col-sm-12">
+                <h2 class="text-center p-5">Personal Profile</h2>
+            </div>
+        </div>-->
+
+        <div class="row d-flex justify-content-start mb-3 mt-5">
+            <div class="col-lg-10 col-md-12 col-sm-12">
+
+            <!-- STYLE BEFORE PERS PROFILE EXISTS-->
+
+            {% if user_exist == false %}
+                {{ render_form(form) }}
+            {% else %}
+                <form class="edit_form" method="POST" action="{{ url_for('edit_user') }}">
+        
+                    {{ form.csrf_token }}
+                        <br>
+                        <!--First Name-->
+                        <div class="row d-flex justify-content-center">
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">First Name</span>
+                                    {{ form.f_name(value=existing_profile.f_name, class_="form-control") }}
+                                </div>
+                            </div> 
+                            <!--Last Name-->
+                            <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">Last Name</span>
+                                    {{ form.l_name(value=existing_profile.l_name, class_="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row d-flex justify-content-center mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">Role in Your Company</span>
+                                {{ form.role(value=existing_profile.role, class_="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="row d-flex justify-content-center mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">About</span>
+                                {{ form.about(value=existing_profile.about, class_="form-control") }}
+                            </div>
+                        </div>
+                        <!--Submit-->
+                        {{ form.submit(class="primary-btn form-control") }}
+
+                </form>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

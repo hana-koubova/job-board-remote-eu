@@ -3,27 +3,7 @@
 {% block content %}
 <section id="post_job">
 <div class="container">
-    
-    <!--{% if not logged_in: %}
-    <div class="row d-flex justify-content-center mb-3">
-        <div class="col-lg-6 col-md-10 col-sm-12">
-            <h2 class="text-center p-5">Looks like you are not logged out
-            </h2>
-        </div>
-    </div>
 
-    <div class="row d-flex justify-content-center mb-3">
-        <div class="col-lg-6 col-md-10 col-sm-12">
-
-            <p class="text-center p-3">You have to register / login to post a job.</p>
-            <div class="d-flex justify-content-center">
-                <a class="p-3" href="{{ url_for('register') }}">Register</a>
-                <a class="p-3" href="{{ url_for('login') }}">Login</a>
-            </div>
-        </div>
-    </div>
-
-    {% else: %}-->
     <div class="row d-flex justify-content-center mb-3">
         <div class="col-lg-6 col-md-10 col-sm-12">
             <h2 class="text-center p-5">New Job Listing</h2>
@@ -119,12 +99,6 @@
                         </div>
                     </div>
                 </div>
-                
-
-                
-                    
-                
-        
                 <br>
                 <br>
                 {{ form.submit(class="primary-btn form-control") }}
@@ -146,7 +120,6 @@
                         ]") }}
 
 
-    <!--{% endif %}-->
 </div>
 </section>
 

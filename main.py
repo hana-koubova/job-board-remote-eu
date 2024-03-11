@@ -35,11 +35,11 @@ from helper import url_friendly, load_user, load_profile, load_company, load_job
 ## Tables and Forms
 
 from tables import User, PersonalProfile, Company, Job
-from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideToolbar, SideCategoryToolbar, SearchForm, SideTypeJobForm, SideLevelForm, ApplyForm
+from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar
 
 ## Internal
 
-from categories import company_industries, all_categories, job_categories, job_types, job_levels, test_categories, two_word_categories, job_categories_full, job_categories_promo, job_promo_links
+from categories import company_industries_full, company_industries, all_categories, job_categories, job_types, job_levels, test_categories, two_word_categories, job_categories_full, job_categories_promo, job_promo_links, job_levels_full, job_types_full
 from texts import toolpits
 
 ## App initiation
@@ -341,7 +341,7 @@ def post_job():
             existing_company.archive_new_job()
         db.session.commit()
         #return redirect(url_for('profile'))
-        return redirect(url_for('success_gen', message="Hey, this is success Yay!"))
+        return redirect(url_for('success_message', message="Hey, this is success Yay!"))
     return render_template("post_job.html",
                            company=company,
                            form=post_job_form,
@@ -349,13 +349,14 @@ def post_job():
                            logged_in = current_user.is_authenticated)
 
 @app.route('/success/<string:message>')
-def success_gen(message):
-    return render_template('success.html',
+def success_message(message):
+    return render_template('success_message.html',
                            message=message), {"Refresh": "3; url=/profile"}
 
 @app.route('/about')
 def about():
-    return render_template("about.html", logged_in = current_user.is_authenticated)
+    return render_template("about.html",
+                           logged_in = current_user.is_authenticated)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -377,7 +378,9 @@ def register():
             login_user(new_user)
             
             return redirect(url_for('register_step2', logged_in = current_user.is_authenticated))
-    return render_template("register.html", form=registration_form, logged_in = current_user.is_authenticated)
+    return render_template("register.html",
+                           form=registration_form,
+                           logged_in = current_user.is_authenticated)
 
 @app.route('/register_step2', methods=['GET', 'POST'])
 @login_required
@@ -395,7 +398,8 @@ def register_step2():
                         administrator_id=current_user.id)
     db.session.add(new_company)
     db.session.commit()
-    return redirect((url_for('register_step3', logged_in = current_user.is_authenticated)))
+    return redirect((url_for('register_step3',
+                             logged_in = current_user.is_authenticated)))
 
 @app.route('/register_step3', methods=['GET', 'POST'])
 @login_required
@@ -407,7 +411,8 @@ def register_step3():
                         about=' ')
     db.session.add(new_person_profile)
     db.session.commit()
-    return redirect(url_for('profile', logged_in = current_user.is_authenticated))
+    return redirect(url_for('profile',
+                            logged_in = current_user.is_authenticated))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -430,7 +435,10 @@ def login():
                  error = 'Wrong password'
         except AttributeError:
             error = 'Email is not registered in database'
-    return render_template('login.html', form=login_form, error=error, logged_in = current_user.is_authenticated)
+    return render_template('login.html',
+                           form=login_form,
+                           error=error,
+                           logged_in = current_user.is_authenticated)
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -440,9 +448,21 @@ def profile():
     existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
     existing_jobs = Job.query.filter_by(company_id=existing_company.id).all()
     job = Job.query.filter_by(company_id=existing_company.id).first()
-    return render_template('profile.html', existing_profile=existing_profile, comp=existing_company, jobs=existing_jobs, logged_in = current_user.is_authenticated)
+    return render_template('profile/profile.html',
+                           existing_profile=existing_profile,
+                           comp=existing_company,
+                           jobs=existing_jobs,
+                           logged_in = current_user.is_authenticated)
 
-##
+@app.route('/user', methods=['GET', 'POST'])
+@login_required
+def user():
+    existing_profile = PersonalProfile.query.filter_by(user_id=current_user.id).first()
+    return render_template('profile/user.html',
+                           existing_profile=existing_profile,
+                           logged_in = current_user.is_authenticated)
+
+
 @app.route('/profile/edit/user', methods=['GET', 'POST'])
 @login_required
 def edit_user():
@@ -460,9 +480,26 @@ def edit_user():
             existing_profile.role = role_edited
             existing_profile.about = about_edited
             db.session.commit()
-            return redirect(url_for('profile'))
-        return render_template('edit_user.html', form=personal_profile_form, existing_profile=existing_profile, logged_in = current_user.is_authenticated)
+            return redirect(url_for('user'))
+        return render_template('profile/edit_user.html',
+                               form=personal_profile_form,
+                               existing_profile=existing_profile,
+                               logged_in = current_user.is_authenticated)
     
+@app.route('/profile/company')
+@login_required
+def company_p():
+    company = load_company()
+    return render_template('profile/company_p.html',
+                           company=company,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/profile/setting')
+@login_required
+def setting():
+    return render_template('profile/setting.html',
+                           logged_in = current_user.is_authenticated)
+
 @app.route('/prifile/edit/company', methods=['GET', 'POST'])
 @login_required
 def edit_company():
@@ -479,10 +516,29 @@ def edit_company():
             existing_company.about = request.form['about']
             current_user.company = request.form['name']
             db.session.commit()
-            return redirect(url_for('profile'))
+            return redirect(url_for('company_p'))
 
-        return render_template('edit_company.html', form=company_form, existing_company=existing_company, industries=company_industries, current_user=current_user, logged_in = current_user.is_authenticated)
+        return render_template('profile/edit_company.html',
+                               form=company_form,
+                               existing_company=existing_company,
+                               industries=company_industries_full,
+                               current_user=current_user,
+                               logged_in = current_user.is_authenticated)
 
+@app.route('/profile/job_listings', methods=['GET', 'POST'])
+@login_required
+def job_listings():
+    company = load_company()
+    profile = load_profile()
+    jobs = load_jobs()
+    jobs_order = Job.query.filter_by(company_id=company.id).order_by(desc(Job.active)).order_by(desc(Job.time_publish)).all()
+    if request.method == 'POST':
+        print("POST TOGGLE")
+    return render_template('profile/job_listings.html',
+                           company=company,
+                           profile=profile,
+                           jobs=jobs_order,
+                           logged_in = current_user.is_authenticated)
 
 @app.route('/profile/manage_jobs', methods=['GET', 'POST'])
 @login_required
@@ -509,7 +565,7 @@ def delete_job(job_id):
     elif is_active == False:
         existing_company.delete_archived_job()
     db.session.commit()
-    return redirect(url_for('manage_jobs'))
+    return redirect(url_for('job_listings'))
 
 @app.route('/profile/manage_jobs/hide/<int:job_id>')
 @login_required
@@ -519,7 +575,7 @@ def hide_job(job_id):
     job_to_hide.active = False
     existing_company.archive_published_job()
     db.session.commit()
-    return redirect(url_for('manage_jobs'))
+    return redirect(url_for('job_listings'))
 
 @app.route('/profile/manage_jobs/activate/<int:job_id>')
 @login_required
@@ -530,7 +586,7 @@ def activate_job(job_id):
     job_to_activate.time_publish = datetime.datetime.now()
     existing_company.recover_job()
     db.session.commit()
-    return redirect(url_for('manage_jobs'))
+    return redirect(url_for('job_listings'))
 
 @app.route('/profile/manage_jobs/edit_job/<int:job_id>', methods=['GET', 'POST'])
 @login_required
@@ -548,8 +604,14 @@ def edit_job(job_id):
         job_to_edit.job_info = request.form['job_info']
         job_to_edit.contact = request.form['contact']
         db.session.commit()
-        return redirect(url_for('manage_jobs'))
-    return render_template('edit_job.html', form=job_edit_form, job=job_to_edit, levels=job_levels, categories=job_categories, job_types=job_types, logged_in = current_user.is_authenticated)
+        return redirect(url_for('job_listings'))
+    return render_template('edit_job.html',
+                           form=job_edit_form,
+                           job=job_to_edit,
+                           levels=job_levels_full,
+                           categories=job_categories_full,
+                           job_types=job_types_full,
+                           logged_in = current_user.is_authenticated)
 
 
 @app.route('/delete_account', methods=['GET', 'POST'])
@@ -570,23 +632,107 @@ def delete_account():
         db.session.commit()
         logout_user()
         return redirect(url_for('home'))
-    return render_template('delete_account.html', form=delete_form, logged_in = current_user.is_authenticated)
+    return render_template('profile/delete_account.html',
+                           form=delete_form,
+                           logged_in = current_user.is_authenticated)
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@app.route('/companies')
+@app.route('/companies', methods=['GET', 'POST'])
 def companies():
-    companies_from_db = Company.query.all()
-    return render_template('companies.html', companies=companies_from_db, logged_in = current_user.is_authenticated)
+    search = request.args.getlist('search')
+    industry = request.args.getlist('industry')
+
+    filter_form = SideIndustryToolbar()
+
+    filter_conditions_ind = []
+    active_jobs_only = False
+
+    if len(industry) == 0 and len(search) == 0:
+        print('NO PARAMS')
+        companies_intersection = Company.query.order_by(Company.name).all()
+    else:
+        # Existing industry
+        if len(industry) > 0:
+            for ind in industry:
+                print('INDUSTRY')
+                print(ind)
+                if ind == 'activejobs':
+                    print('ACTIVE JOBS FILTER')
+                    active_jobs_only = True
+                if ind != 'activejobs':
+                    filter_condition_ind = func.lower(func.replace(func.replace(func.replace(Company.industry, ' ', ''), '/', ''), '-', '')) == ind
+                    filter_conditions_ind.append(filter_condition_ind)
+
+            companies_industry = Company.query.filter(or_(*filter_conditions_ind)).order_by(Company.name).all()
+            companies_ids = {company.id for company in companies_industry}
+            common_industry_ids = companies_ids
+            companies_intersection = companies_industry
+            
+            
+            if active_jobs_only == True:
+                companies_active_jobs = Company.query.filter(Company.num_of_jobs > 0).order_by(desc(Company.num_of_jobs)).all()
+                comp_active_ids = {company.id for company in companies_active_jobs}
+                common_industry_ids = companies_ids.intersection(comp_active_ids)
+                companies_intersection = Company.query.filter(Company.id.in_(common_industry_ids)).order_by(desc(Company.num_of_jobs)).all()
+
+        # Existing Seach
+        if len(search) > 0:
+            search_filtered = Company.query.filter(or_(
+                Company.name.like(f"%{search[0]}%"),
+                Company.about.like(f"%{search[0]}%"),
+                Company.contact.like(f"%{search[0]}%"),
+                Company.address.like(f"%{search[0]}%"),
+                Company.industry.like(f"%{search[0]}%"),
+            ))
+            companies_intersection = search_filtered
+        
+        # Existing both industry and search
+        if len(search) > 0 and len(industry) > 0:
+            search_ids = {company.id for company in search_filtered}
+            common_all_ids = common_industry_ids.intersection(search_ids)
+
+            companies_intersection = Company.query.filter(Company.id.in_(common_all_ids)).all()
+
+    companies_len = len(companies_intersection)
+    ## ADD PAGINATION
+
+    if request.method == 'POST':
+        print('POST')
+        filters_by_user = get_categories(request.form)
+        search_by_user = request.form['searchfield']
+        print(filters_by_user)
+        if search_by_user == '':
+            print('NO SEARCH')
+            return redirect(url_for('companies', industry=filters_by_user))
+        if len(filters_by_user) == 0:
+            print('NO FILTERS')
+            return redirect(url_for('companies', search=search_by_user))
+        if search_by_user != '' and len(filters_by_user) > 0:
+            print('FILTERS AND SEARCH')
+            return redirect(url_for('companies', industry=filters_by_user, search=search_by_user))
+        
+    return render_template('companies.html',
+                           companies_len=companies_len,
+                           url_query=industry,
+                           form=filter_form,
+                           industries = company_industries,
+                           companies=companies_intersection,
+                           logged_in = current_user.is_authenticated)
+
+
 
 @app.route('/company/<int:comp_id>/<name>')
 def company(comp_id, name):
     company = Company.query.filter_by(id=comp_id).first()
     company_jobs = Job.query.filter_by(company_id=company.id).where(Job.active==True).all()
-    return render_template('company.html', company=company, company_jobs=company_jobs, logged_in = current_user.is_authenticated)
+    return render_template('company.html',
+                           company=company,
+                           company_jobs=company_jobs,
+                           logged_in = current_user.is_authenticated)
 
 @app.route('/company/<int:comp_id>/<name>/job/<int:job_id>')
 def job(comp_id, name, job_id):
@@ -630,7 +776,6 @@ def apply_success(job_id):
     return render_template('apply_success.html',
                            company=company,
                            logged_in = current_user.is_authenticated)
-
 
 
 if __name__ == "__main__":

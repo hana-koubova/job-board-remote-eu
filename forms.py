@@ -3,7 +3,7 @@ from wtforms import StringField, PasswordField, SubmitField, validators, Boolean
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_ckeditor import CKEditor, CKEditorField
 
-from categories import job_categories, job_types, company_industries, job_levels, job_categories_full, job_types_full, job_levels_full
+from categories import job_categories, job_types, company_industries_full, job_levels, job_categories_full, job_types_full, job_levels_full
 
 class RegistrationForm(FlaskForm):
     #email = StringField(u'Email', validators=[DataRequired(), Email(message="Email format not valid")])
@@ -29,7 +29,7 @@ class PersonalProfileForm(FlaskForm):
 class CompanyForm(FlaskForm):
     name = StringField(u"Company Name", validators=[Length(max=100)])
     url = StringField(u"Company URL", validators=[Length(max=300)])
-    industry = SelectField(u"Industry", validators=[DataRequired()], choices=company_industries, coerce=str)
+    industry = SelectField(u"Industry", validators=[DataRequired()], choices=company_industries_full, coerce=str)
     contact = StringField(u"Contact", validators=[Length(max=100)])
     address = StringField(u"Address", validators=[Length(max=100)])
     about = CKEditorField(u"About", validators=[Length(max=1000)])
@@ -106,6 +106,42 @@ class SideCategoryToolbar(FlaskForm):
     searchfield = StringField(u"Search Keyword")
 
     submitcategory = SubmitField('Submit')
+
+class SideIndustryToolbar(FlaskForm):
+    advertising = BooleanField(u"Advertising")
+    agriculture = BooleanField(u"Agriculture")
+    blockchain = BooleanField(u"Blockchain")
+    comsumergoods = BooleanField(u"Comsumer Goods")
+    education = BooleanField(u"Education")
+    energygreentech = BooleanField(u"Energy / Greentech")
+    fashionliving = BooleanField(u"Fashion / Living")
+    fintech = BooleanField(u"Fintech")
+    food = BooleanField(u"Food")
+    gaming = BooleanField(u"Gaming")
+    healthcare = BooleanField(u"Healthcare")
+    hospitality = BooleanField(u"Hospitality")
+    it = BooleanField(u"IT")
+    legal = BooleanField(u"Legal")
+    marketing = BooleanField(u"Marketing")
+    transport = BooleanField(u"Transport")
+    ecommerce = BooleanField(u"eCommerce")
+    entertainment = BooleanField(u"Entertainment")
+    recruitment = BooleanField(u"Recruitment")
+    retail = BooleanField(u"Retail")
+    robotics = BooleanField(u"Robotics")
+    saas = BooleanField(u"SaaS")
+    science = BooleanField(u"Science")
+    service = BooleanField(u"Service")
+    tourism = BooleanField(u"Tourism")
+    other  = BooleanField(u"Other")
+
+    activejobs = BooleanField(u"With Open Positions")
+
+    searchfield = StringField(u"Search Keyword")
+
+    submitindustry = SubmitField('Submit')
+
+
 
 
 class SideLevelForm(FlaskForm):

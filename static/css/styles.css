@@ -370,11 +370,33 @@ section {
   CATEGORIES              
 -----------------------------------------*/
 
+.white-div {
+  background: var(--white-color);
+  border-radius: 5px;
+}
+
+.blue-div {
+  background: #f9fafd;
+  /*background: var(--section-bg-color2);*/
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+}
 
 .shadow-light {
     -webkit-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
     -moz-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
     box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.4);
+}
+
+.shadow-strong {
+  -webkit-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.6);
+    -moz-box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.6);
+    box-shadow: 1px 1px 10px 0px rgba(217,217,217,0.7);
+}
+
+.shadow-strong-hover:hover {
+  box-shadow: 0 1rem 3rem rgba(0,0,0,0.1);
+  transition-duration: 200ms;
 }
 
 .categories-block {
@@ -497,7 +519,7 @@ section {
     padding: 10px;
 }
 
-@media only screen and (min-width: 801px) {
+@media only screen and (min-width: 768px) {
     .filters-button {
         display: none !important;
     }
@@ -508,7 +530,8 @@ section {
 
   }
 
-@media only screen and (max-width: 800px) {
+/*---- Here was 800 px before ----*/
+@media only screen and (max-width: 768px) {
 
     .job-board-wrap {
         flex-direction: column;
@@ -639,7 +662,297 @@ section {
     padding-bottom: 75px;
   }
 
+ /*---------------------------------------
+      PROFILE - DASHBOARD - OLD            
+-----------------------------------------*/
+
+#profile a {
+  color: var(--primary-color);
+  font-size: 1.2em;
+}
+
+@media only screen and (max-width: 750px) {
+  #profile a {
+    font-size: 1em;
+  }
+}
+
+#manage-jobs a {
+  color: var(--primary-color);
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.line {
+  height: 1px;
+  color: var(--primary-color)
+}
 
 
+ /*---------------------------------------
+      PROFILE - DASHBOARD - NEW             
+-----------------------------------------*/
+
+.profile-menu {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-menu div {
+  border-radius: 5px;
+  transition-duration: 200ms;
+  width: 80%;
+  height: 50px;
+  display: flex;
+  justify-content: start;
+}
+
+.profile-menu div a, .profile-menu div p {
+  margin-top: auto;
+  margin-bottom: auto;
+  color: grey;
+  text-decoration: none;
+}
+
+.profile-menu div:hover {
+  background-color: var(--section-bg-color2);
+  transition-duration: 200ms;
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 1000px) {
+  .profile-menu div a, .profile-menu div p {
+    margin-left: 10px;
+  }
+  .profile-base-cont {
+    padding: 3em;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  .dashboard-menu-wrap {
+    flex-direction: column;
+  }
+  .profile-menu div {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .profile-menu {
+    min-height: 100px;
+    width: auto;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .profile-menu h3, .profile-menu .to-collapse {
+    display: none;
+  }
+
+  .profile-menu p {
+    margin: 0;
+  }
+}
+
+#breadcrumbs {
+  margin-bottom: 10px;
+}
+
+#breadcrumbs a {
+  transition-duration: 200ms;
+  border-radius: 5px;
+  color: grey;
+  text-decoration: none;
+}
+
+#breadcrumbs a:hover {
+  background: #0dcaf0;
+  transition-duration: 200ms;
+}
+
+#breadcrumbs a, #breadcrumbs p {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.number-large {
+  font-size: 3em;
+  margin: 0.4em;
+}
+
+.triangle-drop {
+  position: absolute;
+  right: 10px;
+  bottom: 20px;
+  width: 12px;
+  height: 12px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--primary-color) transparent transparent transparent;
+  transform: rotate(0deg);
+  transition-duration: 200ms;
+  transform-origin: 6px 3px;
+}
+/*
+.active-toggle:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.active-toggle {
+  --bs-form-check-bg: white;
+}
+
+*/
+.job-listings-card {
+  width: 90%;
+
+}
+
+.job-listings-card > div:nth-child(-n+3) {
+  width: 25%;
+  padding: 5px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.job-listings-card > div:nth-child(-n+3) > * {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+@media only screen and (max-width: 600px) {
+  .job-listings-card > div:nth-child(2) {
+    display: none;
+  }
+
+  .job-listings-card > div:nth-child(-n+2) {
+    width: 40%;
+    margin-right: 20px;
+  }
+
+}
+
+/*-----JOB MANAGEMENT----*/
+
+.job-actions-list {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 90%;
+}
+
+.job-actions-list div {
+  border-radius: 5px;
+  transition-duration: 200ms;
+  width: 50%;
+  height: 35px;
+  display: flex;
+  justify-content: start;
+  padding: 5px;
+}
+
+.job-actions-list div a, .job-actions-list div p {
+  margin-top: auto;
+  margin-bottom: auto;
+  color: grey;
+  text-decoration: none;
+  margin-left: 10px;
+  
+}
+
+.job-actions-list div * {
+  margin-left: 10px;
+}
+
+.job-actions-list div:hover {
+  background-color: var(--section-bg-color2);
+  transition-duration: 200ms;
+  cursor: pointer;
+}
+
+@media only screen and (max-width: 600px) {
+  .job-actions-list div {
+    width: 90%;
+  }
+}
 
 
+.popup-message {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 400px;
+  height: 250px;
+  max-width: 90%;
+  display: none;
+  z-index: 10;
+}
+
+.delete-button {
+  background-color: rgb(175, 1, 1);
+  border-radius: 5px;
+  width: fit-content;
+  height: 40px;
+  color: white;
+  font-size: var(--p-font-size);
+  font-weight: var(--font-weight-normal);
+  transition: all 0.3s;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-button:hover {
+  background-color: rgb(255, 0, 0);
+  color: black;
+}
+
+.delete-button a {
+  color: white;
+  margin-left: 5px;
+  margin-right: 5px;
+  
+}
+
+/*------------------------
+     JOB PAGE
+------------------------*/
+
+.job-description {
+  font-style: var(--body-font-family) !important;
+}
+
+.card-description {
+  min-height: 100px;
+}
+
+/*-----------------------
+    COMPANIES BROWSE
+-------------------------*/
+
+.job-promo {
+  background-color: #7f73eb;
+  height: 42px;
+  width: 50%;
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.job-promo p {
+  color: white;
+}
+
+.companies-results {
+  
+}

@@ -1,0 +1,38 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+<section id="dashboard">
+<div class="container">
+    <div id="breadcrumbs" class="d-flex mt-2">
+        <p class="mx-2">></p>
+        <a href="{{ url_for('profile') }}">Dashboard</a>
+    </div>
+
+    <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+        <div class="col-lg-5 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+            <h4>Active Jobs</h4>
+            <p class="number-large">{{ comp.num_of_jobs }}</p>
+        </div>
+        <div class="col-lg-5 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+            <h4>Archived Jobs</h4>
+            <p class="number-large">{{ comp.num_of_hidden_jobs }}</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+        <div class="col-lg-5 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+            <h4>Number of Responses</h4>
+            <p class="number-large">0</p>
+        </div>
+    </div>
+    <hr class="line">
+    <div class="row">
+        <p class="fs-3">Personal Profile</p>
+    </div>
+    <div class="row">
+        <p class="fs-3">Company Profile</p>
+    </div>
+</div>
+
+
+</section>
+
+{% endblock %}

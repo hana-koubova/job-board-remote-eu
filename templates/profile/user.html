@@ -1,0 +1,44 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+<section id="user">
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex my-2">
+            <p class="mx-2">></p>
+            <a href="{{ url_for('user') }}">User</a>
+        </div>
+        <h2>User</h2>
+        <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+
+            <div class="col-lg-10 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+                <div>
+                    <p>User ID: <span class="fw-bold">{{ current_user.id }}</span></p>
+                </div>
+                <div class="row">
+                    <p>Email: <span class="fw-bold">{{ current_user.email }}</span></p>
+                </div>
+    
+                <div class="row">
+                    <p>First Name: <span class="fw-bold">{{ existing_profile.f_name }}</span></p>
+                </div>
+                <div class="row">
+                    <p>Last Name: <span class="fw-bold">{{ existing_profile.l_name }}</span></p>
+                </div>
+                <div class="row">
+                    <p>Role in {{ current_user.company }}: <span class="fw-bold">{{ existing_profile.role }}</span></p>
+                </div>
+                <div class="row">
+                    <p>About: <span class="fw-bold">{{ existing_profile.about }}</span></p>
+                </div>
+    
+                <a href="{{ url_for('edit_user') }}" class="text-decoration-none">
+                    Edit Personal Profile
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                        <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"></path>
+                    </svg>
+                </a>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

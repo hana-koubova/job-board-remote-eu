@@ -1,16 +1,130 @@
 {% extends "base.html" %} {% block content %}
 
-<h1 class="text-center m-5">Companies</h1>
+<section id="companies">
+<div class="container-fluid">
 
-<div class="container">
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12 text-center">
+            <h2 class="m-5">Browse Companies</h2>
+        </div>
+    </div>
+</div>
+<div class="container-fluid">
+    <!--Main part - Filters and Results-->
+    <div class="row d-flex justify-content-center">
+
+        
+        <div class="col-xxl-10 col-xl-10 col-lg-11 col-md-12 col-sm-12 d-flex job-board-wrap">
+        
+            <!--Side Filtering-->
+            <div class="col-lg-3 col-md-3 col-sm-12 side-tool-div">
+                
+                <form id="category-form" action="{{ url_for('companies') }}" method="POST">
+                    {{ form.csrf_token(form="category-form") }}
+                    {{ form.hidden_tag() }}
+                    <div class="form-wrap">
+                        <div class="flex-fill">
+                            <button class="filters-button triangle-buttons" type="button" onclick="openCategory('filters-category')">
+                                Industries
+                                <div class="triangle-buttons__triangle triangle-buttons__triangle--b"></div>
+                            </button>
+
+                            <h5 class="cat-heading mb-3">Industries</h5>
+                            <div id="filters-category" class="filter-div filters-category">
+                                {% for industry in industries %}
+                                
+                                    {% if industry in url_query %}
+                                        {{ form[industry](checked="checked") }}
+                                    {% else %}
+                                        {{ form[industry]() }}
+                                    {% endif %}
+                                    {{ form[industry].label(class="form-label") }}
+                                    <br>
+                                {% endfor %}
+                            <button class="primary-btn btn close-btn" type="button" onclick="closeCategory('filters-category')">Done</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--With Active Jobs-->
+                    <div class="my-3">
+                        {% if 'activejobs' in url_query %}
+                            {{form.activejobs(checked="checked")}}
+                        {% else %}
+                            {{form.activejobs()}}
+                        {% endif %}
+                        {{form.activejobs.label(class="form-label")}}
+                    </div>
+
+                    <div class="form-wrap second-line-wrap">
+
+                        <div class="filters-search">
+                            <h5 class="mt-3">Search Keyword</h5>
+                            {{ form.searchfield() }}
+                            <br>
+                            <br>
+                        </div>
+                        
+                        <div class="filters-submit">
+                            {{ form.submitindustry(value="Save Filters", class="primary-btn btn") }}
+                        </div>
+                    </div>
+
+
+                </form>
+
+            </div>
+
+            <!--<div class="companies-results row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 border">-->
+            <div class="col-lg-9 col-md-9 col-sm-12 companies-results row d-flex justify-content-center">
+                {% for comp in companies %}
+                <!--Company card-->
+                <!--<div class="p-4">-->
+                    <div class="p-4 col-sm-10 col-md-5 col-lg-5 col-xl-4">
+
+                    <div class="white-div shadow-light d-flex flex-column position-relative shadow-strong-hover">
+                        <img src="static/images/placeholder-image.jpg" alt="">
+                        <div class="p-3">
+                            <h5><a class="stretched-link link-dark" href="{{ url_for('company', comp_id=comp.id, name=comp.name_slug ) }}">{{ comp.name }}</a></h5>
+                            <p>{{comp.industry}}</p>
+                            <div>
+                                {{ (comp.about[:80])|safe }}...
+                            </div>
+                            {% if comp.num_of_jobs > 0 %}
+                                <div class="job-promo">
+                                    {% if comp.num_of_jobs == 1 %}
+                                        <p>{{ comp.num_of_jobs }} Job</p>
+                                    {% elif comp.num_of_jobs > 1 %}
+                                        <p>{{ comp.num_of_jobs }} Jobs</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if companies_len == 0 %}
+                    <div class="row m-4 text-center">
+                        <p>No match</p>
+                    </div>
+                
+                {% endif %}
+
+            </div>
+
+
+
+        </div>
+
+
+
+    <!--<div class="row justify-content-md-center">
     {% for comp in companies %}
     <div class="m-2 col-sm-12 col-md-4 col-lg-3 p-3">
         <div class="card">
         <img src="static/images/placeholder-image.jpg" class="card-img-top" alt="">
         <div class="card-body">
             <h5 class="card-title">{{ comp.name }}</h5>
-            <!--HERE-->
+         
             <p class="card-text">{{ (comp.about[:80])|safe }}...</p>
             <div class="d-flex">
                 <a class="btn btn-primary stretched-link" href="{{ url_for('company', comp_id=comp.id, name=comp.name_slug ) }}" class="btn btn-primary">View</a>
@@ -26,7 +140,53 @@
         </div>
     </div>
     {% endfor %}
-    </div>
-</div>
+    </div>-->
+
+    </div> <!--main div end-->
+    <div id="black-div"></div>
+
+</div> <!--Contaner end-->
+</section>
+
+<script>
+    function openCategory(id) {
+        //document.getElementById("filters-category").style.display = "block";
+        //document.getElementById("filters-category").style.cssText = "border: 1px border yellow;";
+        //document.getElementById("filters-category").style.cssText = "display: block; border: 1px solid red";
+        document.getElementById(id).style.cssText = `
+            display: block;
+            position: fixed;
+            animation: fade_in_show 0.5s;
+            z-index: 9;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+            background-color: white;
+            width: 80%;
+            padding: 10px;
+            font-size: 1.3em;
+            max-height: 90%;
+            overflow: scroll;
+            `;
+        document.getElementById('black-div').style.display = 'block';
+    }
+
+    function closeCategory(id) {
+        document.getElementById(id).style.removeProperty('position')
+        document.getElementById(id).style.removeProperty('z-index')
+        document.getElementById(id).style.removeProperty('top')
+        document.getElementById(id).style.removeProperty('left')
+        document.getElementById(id).style.removeProperty('transform')
+        document.getElementById(id).style.removeProperty('background-color')
+        document.getElementById(id).style.removeProperty('width')
+        document.getElementById(id).style.removeProperty('padding')
+        document.getElementById(id).style.removeProperty('font-size')
+        document.getElementById(id).style.removeProperty('max-height')
+        document.getElementById(id).style.removeProperty('overflow')
+        document.getElementById(id).style.removeProperty('animation')
+        document.getElementById(id).style.removeProperty('display')
+        document.getElementById('black-div').style.display = 'none';
+    }
+</script>
 
 {% endblock %}

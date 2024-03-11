@@ -1,0 +1,51 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+<section id="company_p">
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex my-2">
+            <p class="mx-2">></p>
+            <a href="{{ url_for('company_p') }}">Company</a>
+        </div>
+        <h2>{{ company.name }}</h2>
+
+        <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+
+            <div class="col-lg-10 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+                <div class="row">
+                    <p>URL: <span class="fw-bold">{{ company.url }}</span></p>
+                </div>
+    
+                <div class="row">
+                    <p>Contact: <span class="fw-bold">{{ company.contact }}</span></p>
+                </div>
+                <div class="row">
+                    <p>Address: <span class="fw-bold">{{ company.address }}</span></p>
+                </div>
+                <div class="row">
+                    <p>Industry: <span class="fw-bold">{{ company.industry }}</span></p>
+                </div>
+                <div class="row">
+                    <p>About: <span class="fw-bold">{{ company.about|safe }}</span></p>
+                </div>
+                <div>
+                    <p>
+                        <a href="{{ url_for('edit_company') }}" class="text-decoration-none">
+                            Edit Company Profile
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                                <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"></path>
+                            </svg>
+                        </a>
+                    </p>
+                    <p>
+                        <a href="{{ url_for('company', comp_id=company.id, name=company.name_slug) }}" class="text-decoration-none text-info">
+                            Company Page
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                                <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"></path>
+                            </svg>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base_profile.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+
+{% block profile_content %}
+
+<section>
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex mt-2">
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('company_p') }}"><p><b>Company</b></p></a>
+            <p class="mx-2"><b>></b></p>
+            <a href="{{ url_for('edit_company') }}"><p><b>Edit Company</b></p></a>
+        </div>
+
+        <div class="row d-flex justify-content-center mb-3 mt-5 pt-5">
+            <div class="col-lg-10 col-md-12 col-sm-12">
+
+                <form class="edit_form" method="POST" action="{{ url_for('edit_company') }}">     
+        
+                    {{ form.csrf_token }}
+                    <!--Name-->
+                    <div class="row d-flex justify-content-center mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Name</span>
+                            {{ form.name(value=existing_company.name, class_="form-control") }}
+                        </div>
+                    </div>
+                    <!--URL-->
+                    <div class="row d-flex justify-content-center mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">URL</span>
+                            {{ form.url(value=existing_company.url, class_="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="row d-flex justify-content-center">
+                    <!--Industry-->
+                    
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">Industry</span>
+                    
+                                <select name="industry" id="industry" class="form-control form-select">
+                                    {% for industry in industries %}
+                                        {% if existing_company.industry == industry %}
+                                            <option selected>{{ industry }}</option>
+                                        {% else %}
+                                            <option>{{ industry }}</option>
+                                        {% endif %}
+                
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!--Contact-->
+                        <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">Contact</span>
+                                {{ form.contact(value=existing_company.contact, class_="form-control") }}
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--Address-->
+                    <div class="row d-flex justify-content-center mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">Address</span>
+                            {{ form.address(value=existing_company.address, class_="form-control") }}
+                        </div>
+                    </div>
+                    {{ form.about.label(class="form-label") }}
+                    <br>
+                    {{ ckeditor.create(value=existing_company.about, name="about") }}
+                    <br>
+                    {{ form.submit(class="primary-btn form-control") }}
+        
+                </form>
+            </div>
+        </div>
+    
+<!--</div>-->
+
+    </div>
+</section>
+
+{{ ckeditor.load() }}
+{{ ckeditor.config(name="about",
+                    custom_config="
+                        scayt_autoStartup:true,
+                        toolbar: [
+                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
+                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
+                            { name: 'editing', items: [ 'Scayt' ]}
+                    
+                        ]") }}
+
+
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+<section id="job_listings">
+    <div class="container">
+        <div id="breadcrumbs" class="d-flex my-2">
+            <p class="mx-2">></p>
+            <a href="{{ url_for('job_listings') }}">Job listings</a>
+        </div>
+
+        <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+
+            <div class="col-lg-10 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+                <h3>Job listings ({{ company.num_of_jobs + company.num_of_hidden_jobs }})</h3>
+
+
+                <div class="row d-flex justify-content-center">
+                    {% if company.num_of_jobs > 0 %}
+                        {% for job in jobs %}
+                        <!--Job Card-->
+                        {% if job.active %}
+                        <div class="job-listings-card d-flex justify-content-start white-div shadow-light position-relative mt-5">
+                        {% else %}
+                        <div class="job-listings-card d-flex justify-content-start shadow-light position-relative mt-5">
+                        {% endif %}
+                            <div>
+                                <h5>{{ job.role }}</h5>
+                            </div>
+                            <div>
+                                <p>{{ "Active" if job.active else "Archived" }}</p>
+                            </div>
+                            <div>
+                                {% if job.active %}
+                                <p>Published: {{ job.time_publish.strftime('%d-%m-%Y')}}</p>
+                                <!--<p>Published: {{ job.time_publish.strftime('%d-%m-%Y') if job.active else "" }}</p>-->
+                                {% endif %}
+                            </div>
+                            <a class="text-decoration-none link-dark stretched-link" data-bs-toggle="collapse" href="#{{job.id}}_expand" role="button" aria-expanded="false" aria-controls="#{{job.id}}_expand" onclick="helloFunc('triangle_{{job.id}}')"><div id="triangle_{{job.id}}" class="triangle-drop"></div></a>
+                        </div>
+                        <!--Collapse Div-->
+                        <div class="collapse white-div position-relative job-actions-list" id="{{job.id}}_expand">
+                            <!--<div class="m-3 d-flex border">-->
+                                <!-- Archive / Publish-->
+                                {% if job.active %}
+                                <div class="m-1 position-relative">
+                                    <a href="{{ url_for('hide_job', job_id=job.id) }}" class="text-decoration-none stretched-link">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-archive" viewBox="0 0 16 16">
+                                            <path d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5zm13-3H1v2h14zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/>
+                                        </svg></a>
+                                        <p>
+                                        Hide / Archive Job
+                                        </p>
+                                </div>
+                                {% else %}
+                                <div class="m-1 position-relative">
+                                    <a href="{{ url_for('activate_job', job_id=job.id) }}" class="text-decoration-none stretched-link">
+                                        
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                                            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                                        </svg></a>
+                                        <p>
+                                        Activate Job
+                                        </p>
+                                </div>
+                                {% endif %}
+                                
+                            <!--Edit Job-->
+                            <div class="m-1 position-relative">
+                            <a href="{{ url_for('edit_job', job_id=job.id) }}" class="stretched-link">
+                                
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                                    <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"></path>
+                                </svg></a>
+                                <p>
+                                Edit Job
+                                </p>
+                            </div>
+
+                            <!--Delete Job-->
+
+                            <div class="m-1 mb-3 position-relative">
+                                <a href="#" onclick="deletePopup('{{job.role}}');" class="text-decoration-none text-danger stretched-link">
+                                
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"></path>
+                                    </svg>
+                                </a>
+                                <p>
+                                    Delete This Job
+                                </p>
+                            </div>
+
+
+                        </div>
+
+                        <div id="delete-popup" class="popup-message white-div">
+                            <h4 class="text-center">Delete job?</h4>
+                            <h3 class="text-center">{{ job.role }}</h3>
+                            
+                            <div class="d-flex w-100 justify-content-around">
+                                <button class="primary-btn btn" onclick="closePopup();">No, Back</button>
+                                <div class="delete-button">
+                                    <a href="{{ url_for('delete_job', job_id=job.id) }}" onclick="closePopup()">Yes, Delete</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% endfor %}
+                    {% else %}
+                        <p>Empty</p>
+                        <p>Post a Job</p>
+                    {% endif %}
+                    
+
+                </div>
+
+
+
+
+                    <!--<table class="table table-striped m-3 w-75">
+                        <thead>
+                            <tr>
+                                <th>Job Role</th>
+                                <th>Status</th>
+                                <th>Date Published</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if company.num_of_jobs > 0 %}
+                                {% for job in jobs %}
+                                    <tr>
+                                        <td>
+                                            <a class="text-decoration-none link-dark" href="{{ url_for('job', comp_id=company.id, name=company.name_slug, job_id=job.id) }}">{{ job.role }}</a>
+                                        </td>
+                                        <td>{{ "Active" if job.active else "Archived" }}</td>
+                                        <td>{{ job.time_publish.strftime('%d-%m-%Y') if job.active else "" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3">Empty</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>-->
+
+
+                    
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="black-div"></div>
+</section>
+
+<script>
+    
+  
+    const triangles = document.getElementsByClassName('test');
+
+    function rotate() {
+        triangle.style.transform = 'rotate(180deg)';
+    }
+
+    function helloFunc(el_id) {
+        var element = document.getElementById(el_id);
+        att = element.style.transform;
+        if (att == "" || att == "rotate(0deg)") {
+            element.style.transform = 'rotate(180deg)'
+        }
+        if (att == "rotate(180deg)") {
+            element.style.transform = 'rotate(0deg)'
+        }
+
+    }
+
+    function deletePopup(job_role) {
+        console.log(job_role)
+        delete_popup = document.getElementById('delete-popup');
+        delete_popup.style.cssText = `
+            display: block;
+            animation: fade_in_show 0.5s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center
+            `;
+        document.getElementById('black-div').style.display = 'block';
+    }
+
+    function closePopup() {
+        document.getElementById('delete-popup').style.removeProperty('display')
+        document.getElementById('delete-popup').style.removeProperty('animation')
+        document.getElementById('delete-popup').style.removeProperty('flex-direction')
+        document.getElementById('delete-popup').style.removeProperty('justify-content')
+        document.getElementById('delete-popup').style.removeProperty('align-items')
+        document.getElementById('black-div').style.display = 'none';
+    }
+
+    
+
+
+</script>
+{% endblock %}

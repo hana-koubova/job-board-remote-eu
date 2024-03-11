@@ -1,39 +1,72 @@
 {% extends "base.html" %} {% block content %}
+<section id="job-listing-page">
+    
+    <div class="container">
+        <div class="row p-3">
+            <div class="col-lg-6 col-sm-12">
+                <h1>{{ job.role }} in {{ company.name }}</h>
+            </div>
+            <div class="col-lg-6 col-sm-12 d-flex justify-content-center aligh-items-center p-3">
+                <img src="/static/images/placeholder-image.jpg" width="200px">
+            </div>
+        </div>
 
-<div class="container m-5 d-flex flex-column align-items-center">
-<div class="row w-75 d-flex">
-    <div class="col-lg-6 col-sm-12">
-        <h1>{{ job.role }} in {{ company.name }}</h>
-    </div>
-    <div class="col-lg-6 col-sm-12">
-        <img src="/static/images/placeholder-image.jpg" width="200px">
-    </div>
-</div>
+        <div class="row p-3">
+            <div class="col-12">
+                <div class="p-3 my-4">
+                    <p><b>Salary: </b>{{ job.salary }} €</p>
+                    <p><b>Start Date: </b>{{ job.start_date }}</p>
+                    <p><b>Key Skills: </b>{{ job.skills }}</p>
+                    <p><b>Level: </b>{{ job.level }}</p>
+                </div>
 
-<div class="row w-75 font-monospace m-5">
-    <div class="col-lg-8 col-sm-12">
-        <p>Salary: {{ job.salary }}</p>
-        <br>
-        <p>Start date: {{ job.start_date }}</p>
-        <br>
-        <p>Key Skills: {{ job.skills }}</p>
-        <br>
-        <p>Level: {{ job.level }}</p>
-        <br>
-        {{ job.job_info|safe }}
-        <br>
-        <hr class="w-75">
+                <div class="white-div shadow-light p-3 my-4">
+                    <p><b>Job Description:</b></p>
+                    {{ job.job_info|safe }}
+                </div>
+            </div>
+        </div>
+
+        <hr class="line">
+
+        <div class="row p-3">
+            <div class="col-12 my-2 job-description">
+                <h3 class="mb-3">About {{ company.name }}</h3>
+                <div class="p-3 my-2">
+                    {{ company.about|safe }}
+                </div>
+                <div class="p-3">
+                    <a href="{{ url_for('company', comp_id=company.id, name=company.name_slug) }}" class="text-decoration-none">
+                        More About {{ company.name }}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill" viewBox="0 0 16 16">
+                            <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="line">
+        <div class="row p-3">
+            <div>
+                <h4>Do you have questions?</h4>
+                <div class="d-flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="18" fill="currentColor" class="bi bi-person-raised-hand mx-2" viewBox="0 0 16 16">
+                        <path d="M6 6.207v9.043a.75.75 0 0 0 1.5 0V10.5a.5.5 0 0 1 1 0v4.75a.75.75 0 0 0 1.5 0v-8.5a.25.25 0 1 1 .5 0v2.5a.75.75 0 0 0 1.5 0V6.5a3 3 0 0 0-3-3H6.236a1 1 0 0 1-.447-.106l-.33-.165A.83.83 0 0 1 5 2.488V.75a.75.75 0 0 0-1.5 0v2.083c0 .715.404 1.37 1.044 1.689L5.5 5c.32.32.5.754.5 1.207"/>
+                        <path d="M8 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+                    </svg>
+                    <h6>Contact: {{ job.contact }}</h6>
+                </div>
+            </div>
+        </div>
+        <hr class="line">
+        <div class="row p-3">
+            <div class="col">
+                <a class="btn primary-btn form-control" href="{{ url_for('apply', job_id=job.id) }}">Apply</a>
+            </div>
+        </div>
     </div>
-    <div class="mt-5 mb-5">
-        <h3>About {{ company.name }}</h3>
-        {{ company.about|safe }}
-        <hr class="w-75">
-    </div>
-    <div>
-        <p>Contact: {{ job.contact }}</p>
-        <a class="btn btn-primary" href="{{ url_for('apply', job_id=job.id) }}">Apply</a>
-    </div>
-</div>
-</div>
+
+</section>
 
 {% endblock %}
