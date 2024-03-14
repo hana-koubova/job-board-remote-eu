@@ -17,52 +17,61 @@
     </div>
     <div class="row d-flex justify-content-center">
         <div class="col-lg-6 col-md-10 col-sm-12">
-        <form action="{{ url_for('apply_success', job_id=job_id) }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <form action="{{ url_for('apply', job_id=job_id) }}" method="POST" enctype="multipart/form-data">
+            <!--<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>-->
+            {{ form.csrf_token }}
             
             <div class="row">
                 <div class="col">
                     <!--First name-->
-                    <input type="text" class="form-control" placeholder="First name" aria-label="First name" required>
+                    <!--<input type="text" class="form-control" placeholder="First name" aria-label="First name" required>-->
+                    {{ form.a_first_name(class_="form-control", placeholder="First Name")}}
                 </div>
                 <div class="col">
                     <!--Last name-->
-                    <input type="text" class="form-control" placeholder="Last name" aria-label="Last name" required>
+                    <!--<input type="text" class="form-control" placeholder="Last name" aria-label="Last name" required>-->
+                    {{ form.a_last_name(class_="form-control", placeholder="Last Name")}}
                 </div>
             </div>
             <br>
             <div class="input-group mb-3">
                 <!--Email-->
                 <span class="input-group-text" id="basic-addon1">@</span>
-                <input type="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="basic-addon1" required>
+                <!--<input type="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="basic-addon1" required>-->
+                {{ form.a_email(class_="form-control", placeholder="Email")}}
             </div>
             <br>
 
 
             <div class="mb-3">
                 <!--File upload-->
-                <label for="formFile" class="form-label">Attach your CV (.pdf)</label>
-                <input class="form-control" type="file" id="formFile">
+                <label for="formFile" class="form-label mb-2">Attach your CV (.pdf)</label>
+                <!--<input class="form-control" type="file" id="formFile" required>-->
+                {{ form.a_cv(id="formFile", class_="form-control")}}
             </div>
             <br>
 
             <div class="input-group">
                 <!--Say Hi-->
                 <span class="input-group-text">Say Hi</span>
-                <textarea class="form-control" aria-label="With textarea"></textarea>
+                <!--<textarea class="form-control" aria-label="With textarea" placeholder="Optional greeting"></textarea>-->
+                {{ form.a_comments(class_="form-control", placeholder="Optional greeting")}}
             </div>
 
             <br>
-            <div class="form-check">
+            <div class="">
                 <!--Agree-->
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>
+                <!--<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" required>-->
+                {{ form.agree(id="flexCheckDefault") }}
+                <!--{{ form.agree.label(class="form-label") }}-->
                 <label class="form-check-label" for="flexCheckDefault">
                   I Agree to share provided information with {{company.name}}.
                 </label>
             </div>
             <br>
             <!--Submit-->
-            <button type="submit" class="primary-btn form-control">Submit Application</button>
+            <!--<button type="submit" class="primary-btn form-control">Submit Application</button>-->
+            {{ form.submit(class="primary-btn form-control") }}
         </form>
         </div>
     </div>

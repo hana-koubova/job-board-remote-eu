@@ -1,3 +1,5 @@
 /templates/archived
 /static/other
 /.venv
+requirements_old.txt
+/__pycache__

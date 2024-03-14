@@ -59,7 +59,7 @@
 
                         <div class="filters-search">
                             <h5 class="mt-3">Search Keyword</h5>
-                            {{ form.searchfield() }}
+                            {{ form.searchfield(value=search_query[0]) }}
                             <br>
                             <br>
                         </div>
@@ -81,14 +81,15 @@
                 <!--<div class="p-4">-->
                     <div class="p-4 col-sm-10 col-md-5 col-lg-5 col-xl-4">
 
-                    <div class="white-div shadow-light d-flex flex-column position-relative shadow-strong-hover">
+                    <div class="white-div shadow-light d-flex flex-column position-relative shadow-strong-hover company-card-div">
                         <img src="static/images/placeholder-image.jpg" alt="">
                         <div class="p-3">
                             <h5><a class="stretched-link link-dark" href="{{ url_for('company', comp_id=comp.id, name=comp.name_slug ) }}">{{ comp.name }}</a></h5>
                             <p>{{comp.industry}}</p>
-                            <div>
+                            <div class="company-card-description mb-2">
                                 {{ (comp.about[:80])|safe }}...
                             </div>
+                            <div class="company-card-fyll-space d-flex align-items-center">
                             {% if comp.num_of_jobs > 0 %}
                                 <div class="job-promo">
                                     {% if comp.num_of_jobs == 1 %}
@@ -98,6 +99,7 @@
                                     {% endif %}
                                 </div>
                             {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>

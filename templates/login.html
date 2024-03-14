@@ -2,12 +2,55 @@
 {% from 'bootstrap5/form.html' import render_form %}
 {% block content %}
 
-<h1 class="text-center p-5">Login</h1>
+
+<section id="login">
+    <div class="container">
+    
+        <div class="row d-flex justify-content-center mb-3">
+            <div class="col-lg-6 col-md-10 col-sm-12">
+                <h2 class="text-center p-5">Login</h2>
+            </div>
+        </div>
+    
+        <div class="row d-flex justify-content-center mb-5">
+            <div class="col-lg-6 col-md-10 col-sm-12">
+                {% if error != None %}
+                    <p class="text-center text-danger">{{ error }}</p>
+                {% endif %}
+    
+                <form method="POST" action="{{ url_for('login') }}"> 
+                    {{ form.csrf_token }}
+
+                    <!--Email-->
+                    <div class="row d-flex justify-content-center">
+                        <div class="input-group mb-4">
+                            <span class="input-group-text" id="basic-addon1">@</span>
+                            {{ form.email(class_="form-control", placeholder="Email") }}
+                        </div>
+                    </div>
+
+                    <!--Password-->
+                    <div class="row d-flex justify-content-center">
+                        <div class="mb-4">
+                            {{ form.password(class_="form-control", placeholder="Password") }}
+                        </div>
+                    </div>
+
+
+                    {{ form.submit(class="primary-btn form-control mb-5") }}
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--<h1 class="text-center p-5">Login</h1>
 {% if error != None %}
     <p class="text-center text-danger">{{ error }}</p>
 {% endif %}
 <div class="row d-flex justify-content-center p-5">
     {{ render_form(form) }}
-</div>
+</div>-->
 
 {% endblock %}

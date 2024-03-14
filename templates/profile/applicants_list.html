@@ -1,0 +1,103 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+
+<section id="job_listings">
+    <div class="container">
+        
+        <div id="breadcrumbs" class="d-flex my-2">
+            <p class="mx-2">></p>
+            <a href="{{ url_for('applicants') }}">Applicants</a>
+            <p class="mx-2">></p>
+            <a href="{{ url_for('order_alph', job_id=job.id) }}">{{ job.role }} {{ job.id }}</a>
+        </div>
+
+        <!--<p class="muted">Placeholder text to demonstrate some <a href="#" data-bs-toggle="tooltip" data-bs-title="Default tooltip">inline links</a> with tooltips. This is now just filler, no killer. Content placed here just to mimic the presence of <a href="#" data-bs-toggle="tooltip" data-bs-title="Another tooltip">real text</a>. And all that just to give you an idea of how tooltips would look when used in real-world situations. So hopefully you've now seen how <a href="#" data-bs-toggle="tooltip" data-bs-title="Another one here too">these tooltips on links</a> can work in practice, once you use them on <a href="#" data-bs-toggle="tooltip" data-bs-title="The last tip!">your own</a> site or project.</p>-->
+
+        <h2>{{ job.role }}</h2>
+        <p>{{ num_applicants }} applicants</p>
+        <div class="d-flex justify-content-start p-2">
+            {% if order == None %}
+                <a href="{{ url_for('order_alph', job_id=job.id) }}"><button class="btn filters-btn mx-3">Order A-Z</button></a>
+                <a href="{{ url_for('order_time', job_id=job.id) }}"><button class="btn filters-btn mx-3">Order By Time</button></a>
+            {% endif %}
+
+            {% if order == 'alph' %}
+                <button class="btn filters-btn mx-3" disabled>Order A-Z</button>
+                <a href="{{ url_for('order_time', job_id=job.id) }}"><button class="btn filters-btn mx-3">Order By Time</button></a>
+            {% endif %}
+
+            {% if order == 'time' %}
+                <a href="{{ url_for('order_alph', job_id=job.id) }}"><button class="btn filters-btn mx-3">Order A-Z</button></a>
+                <button class="btn filters-btn mx-3" disabled>Order By Time</button>
+            {% endif %}
+        </div>
+
+        <!--Download All / CSV-->
+        <div class="d-flex justify-content-end">
+
+            <!--All in Excel-->
+            <a href="{{ url_for('download_excel', job_id=job.id) }}" data-bs-toggle="tooltip" data-bs-title="Export Applicants">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-excel m-3 download-icon" viewBox="0 0 16 16">
+                    <path d="M5.884 6.68a.5.5 0 1 0-.768.64L7.349 10l-2.233 2.68a.5.5 0 0 0 .768.64L8 10.781l2.116 2.54a.5.5 0 0 0 .768-.641L8.651 10l2.233-2.68a.5.5 0 0 0-.768-.64L8 9.219l-2.116-2.54z"/>
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                </svg>
+            </a>
+
+            <!--CVs in Zip-->
+            <a href="{{ url_for('download_all_cvs', job_id=job.id) }}" data-bs-toggle="tooltip" data-bs-title="Download All CVs">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-arrow-down-fill my-3 download-icon" viewBox="0 0 16 16">
+                    <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m-1 4v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 0 1 .708-.708L7.5 11.293V7.5a.5.5 0 0 1 1 0"/>
+                </svg>
+            </a>
+
+        </div>
+
+
+
+        <table class="table table-hover applicants-table">
+            <thead>
+              <tr class="first-row">
+                <th>Name</th>
+                <th>Email</th>
+                <th>Applied</th>
+                <th>CV</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for applicant in applicants %}
+                <tr>
+                    <td class="first-cell" data-th="Name: ">{{ applicant.a_first_name }} {{ applicant.a_last_name }}</td>
+                    <td data-th="Email: ">{{ applicant.a_email }}</td>
+                    <td data-th="Applied on: ">{{ applicant.time_applied.strftime('%d-%m-%Y')}}</td>
+                    <td data-th="CV ">
+                        <div class="d-flex">
+                        <!--To view CV-->
+                        <a href="{{ url_for('view_cv', fileurl=applicant.a_cv_link) }}" target="_blank" data-bs-toggle="tooltip" data-bs-title="View CV">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-person mx-2 download-icon" viewBox="0 0 16 16">
+                                <path d="M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2v9.255S12 12 8 12s-5 1.755-5 1.755V2a1 1 0 0 1 1-1h5.5z"/>
+                            </svg></a>
+                        <!--To download CV-->
+                        <a href="{{ url_for('download_cv', fileurl=applicant.a_cv_link) }}" download data-bs-toggle="tooltip" data-bs-title="Download CV">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-arrow-down mx-2 download-icon" viewBox="0 0 16 16">
+                                <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                            </svg></a>
+                        </div>
+
+                    </td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+
+    </div>
+</section>
+<script>
+    console.log("HELLO Tooltip")
+    document.addEventListener("DOMContentLoaded", function (event) {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    });
+</script>
+
+{% endblock %}

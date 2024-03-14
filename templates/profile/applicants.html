@@ -1,0 +1,44 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+
+<section id="job_listings">
+    <div class="container">
+        
+        <div id="breadcrumbs" class="d-flex my-2">
+            <p class="mx-2">></p>
+            <a href="{{ url_for('applicants') }}">Applicants</a>
+        </div>
+
+        <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
+
+            <div class="col-lg-10 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
+                <h3>Applicants</h3>
+                <div class="row d-flex justify-content-center">
+            
+                {% for job in jobs %}
+                    {% if job.active %}
+                        <div class="row job-listings-card d-flex justify-content-start white-div shadow-light position-relative mt-5">
+                    {% else %}
+                        <div class="row job-listings-card d-flex justify-content-start shadow-light position-relative mt-5">
+                    {% endif %}
+                            <div class="col">
+                                <h5 class="m-2">{{ job.role }}</h5>
+                                <p class="m-3">{{ jobs_applicants[job.id] }} applicants</p>
+                            </div>
+                            <div class="col d-flex justify-content-end">
+                            {% if jobs_applicants[job.id] > 0 %}
+                                <a href="{{ url_for('order_alph', job_id=job.id) }}"><button class="btn primary-btn m-0">See Applicants</button></a>
+                            {% endif %}
+                            </div>
+                        </div>
+
+                {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</section>
+
+{% endblock %}

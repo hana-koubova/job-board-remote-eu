@@ -1,3 +1,65 @@
 {% extends "base.html" %} {% block content %}
-<h1 class="text-center p-5">About us</h1>
+<section class="hero-section d-flex justify-content-center align-items-center about-us">
+    <div class="section-overlay"></div>
+
+    <div class="container">
+        <div class="row text-center">
+            <h2>About RemoteEU</h2>
+
+        </div>
+    </div>
+
+
+</section>
+<section class="p-4">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-8 col-md-10 col-sm-12">
+                <h3 class="py-4">Welcome to RemoteEU</h3>
+                <h5 class="py-4">Your premier destination for finding 
+                    remote job opportunities in Europe</h5>
+
+                <p class="py-4">{{ about_par.about }}</p>
+                <h5>The 'Team'</h5>
+                <p class="py-4">{{ about_par.creator }}</p>
+                <p class="pb-4">{{ about_par.team }}</p>
+                <h5>Values</h5>
+                <p class="py-4">{{ about_par.final }}</p>
+                <h5>Thank you!</h5>
+                <p class="py-4">{{ about_par.last }}</p>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="section-overlay"></div>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-6 col-10">
+                <h2 class="text-white mb-2">Join the Remote Revolution in Europe</h2>
+
+                <p class="text-white">We are building seamless remote work solutions for European companies. Try it today and find your next star employee.</p>
+            </div>
+
+            <div class="col-lg-4 col-12 ms-auto">
+                <div class="custom-border-btn-wrap d-flex align-items-center mt-lg-4 mt-2">
+                    {% if logged_in %}
+                    <a href="{{ url_for('post_job') }}" class="white-btn btn m-4">Post a job</a>
+                    {% else %}
+                    <a href="#" class="white-btn btn m-4">Create an account</a>
+                    <a href="#" class="white-btn btn m-4">Log In</a>
+                    {% endif %}
+                    
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
 {% endblock %}

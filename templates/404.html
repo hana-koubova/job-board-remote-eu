@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section id="404">
+    <div class="container">
+    
+        <div class="row d-flex justify-content-center mb-3">
+            <div class="col-lg-6 col-md-10 col-sm-12 d-flex flex-column align-items-center">
+                <h2 class="text-center p-5 m-5 error-code">404</h2>
+                <h4 class="text-center p-5 m-5 error-message">Oops, page not found</h4>
+                <a href="{{ url_for('home') }}"><button class="btn primary-btn">Home</button></a>
+            </div>
+        </div>
+    </div>
+</section>
+    
+
+{% endblock %}

@@ -2,15 +2,23 @@ import uuid
 import time
 import datetime
 import json
+import os
+import glob
+import zipfile
+import pandas as pd
+from io import BytesIO
 
 ## Flask
 
-from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify
+from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory
+import flask_excel as excel
 
 ## Login and security
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.exceptions import HTTPException
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from werkzeug.utils import secure_filename
 #from flask_oauthlib.client import OAuth
 
 ## Databases
@@ -30,22 +38,36 @@ from sqlalchemy import and_, select, or_, func, desc
 
 ## Modules
 
-from helper import url_friendly, load_user, load_profile, load_company, load_jobs, get_categories
+from helper import url_friendly, load_user, load_profile, load_company, load_jobs, load_applicants, get_categories, is_company_full, is_profile_full
 
 ## Tables and Forms
 
-from tables import User, PersonalProfile, Company, Job
+from tables import User, PersonalProfile, Company, Job, Applicant
 from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar
 
 ## Internal
 
 from categories import company_industries_full, company_industries, all_categories, job_categories, job_types, job_levels, test_categories, two_word_categories, job_categories_full, job_categories_promo, job_promo_links, job_levels_full, job_types_full
-from texts import toolpits
+from texts import toolpits, about_par
 
 ## App initiation
 
 app = Flask(__name__)
 ckeditor = CKEditor(app)
+
+## Upload
+
+UPLOAD_FOLDER = 'upload/cv'
+ALLOWED_EXTENSIONS = {'pdf'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 1000 ## 1Mb
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+## Bootsrap
 
 bootstrap = Bootstrap5(app)
 ## To generate random key
@@ -76,17 +98,38 @@ with app.app_context():
     db.create_all()
 
 
+## Errors
+    
+@app.errorhandler(404)
+def handle_404_error(err):
+    return render_template('404.html')
+
+#@app.errorhandler(Exception)
+#def handle_exception(err):
+#    # pass through HTTP errors
+#    if isinstance(err, HTTPException):
+#        return err
+#
+#    # now you're handling non-HTTP exceptions only
+#    return render_template("500.html",
+#                           err=err), 500
+
+
 ## Routing
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    five_recent_jobs = Job.query.order_by(Job.time_publish).all()[:5]
+    print(len(five_recent_jobs))
     form = SearchForm()
+
     if request.method == 'POST':
         search_keyword = request.form['job-title']
         print(search_keyword)
         return redirect(url_for('board', search=search_keyword))
     return render_template("index.html",
                            form=form,
+                           jobs=five_recent_jobs,
                            job_categories=job_categories_promo,
                            links=job_promo_links,
                            logged_in = current_user.is_authenticated)
@@ -309,6 +352,9 @@ def search():
 def post_job():
     post_job_form = JobForm()
     company=load_company()
+    profile=load_profile()
+    company_full = is_company_full(company)
+    profile_full = is_profile_full(profile)
     toolpits_to_send = toolpits['post_job']
     if post_job_form.validate_on_submit() and request.method == 'POST':
         existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
@@ -344,6 +390,8 @@ def post_job():
         return redirect(url_for('success_message', message="Hey, this is success Yay!"))
     return render_template("post_job.html",
                            company=company,
+                           company_full=company_full,
+                           profile_full=profile_full,
                            form=post_job_form,
                            toolpits=toolpits_to_send,
                            logged_in = current_user.is_authenticated)
@@ -356,29 +404,40 @@ def success_message(message):
 @app.route('/about')
 def about():
     return render_template("about.html",
+                           about_par=about_par,
                            logged_in = current_user.is_authenticated)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    error = None
     registration_form = RegistrationForm()
     if registration_form.validate_on_submit() and request.method == 'POST':
-            hash_and_salted_password = generate_password_hash(
-                request.form.get('password'),
-                method='pbkdf2:sha256',
-                salt_length=8
-            )
-            new_user = User(email=request.form['email'],
-                password=hash_and_salted_password,
-                company=request.form['company'])
-            
-            db.session.add(new_user)
-            db.session.commit()
+            # Check if email exists
+            email = request.form['email']
+            exists = User.query.filter_by(email=email).first()
 
-            # Log in and authenticate user after adding details to database
-            login_user(new_user)
+            if exists != None:
+                error = 'This Email already exists in our database.'
+
+            if exists == None:
+                hash_and_salted_password = generate_password_hash(
+                    request.form.get('password'),
+                    method='pbkdf2:sha256',
+                    salt_length=8
+                )
+                new_user = User(email=request.form['email'],
+                    password=hash_and_salted_password,
+                    company=request.form['company'])
             
-            return redirect(url_for('register_step2', logged_in = current_user.is_authenticated))
+                db.session.add(new_user)
+                db.session.commit()
+
+                # Log in and authenticate user after adding details to database
+                login_user(new_user)
+            
+                return redirect(url_for('register_step2', logged_in = current_user.is_authenticated))
     return render_template("register.html",
+                           error=error,
                            form=registration_form,
                            logged_in = current_user.is_authenticated)
 
@@ -389,10 +448,10 @@ def register_step2():
 
     new_company = Company(name=current_user.company,
                         name_slug=url_friendly(current_user.company),
-                        url=' ',
-                        about=' ',
-                        contact=' ',
-                        address=' ',
+                        url='',
+                        about='',
+                        contact='',
+                        address='',
                         num_of_jobs=0,
                         num_of_hidden_jobs=0,
                         administrator_id=current_user.id)
@@ -405,10 +464,10 @@ def register_step2():
 @login_required
 def register_step3():
     new_person_profile = PersonalProfile(user_id=current_user.id,
-                        f_name=' ',
-                        l_name=' ',
-                        role=' ',
-                        about=' ')
+                        f_name='',
+                        l_name='',
+                        role='',
+                        about='')
     db.session.add(new_person_profile)
     db.session.commit()
     return redirect(url_for('profile',
@@ -447,8 +506,19 @@ def profile():
     existing_profile = PersonalProfile.query.filter_by(user_id=current_user.id).first()
     existing_company = Company.query.filter_by(administrator_id=current_user.id).first()
     existing_jobs = Job.query.filter_by(company_id=existing_company.id).all()
+    applicants = Applicant.query.filter_by(administrator_id=current_user.id).all()
+    num_applicants = len(applicants)
+    
+
+    company_full = is_company_full(existing_company)
+    profile_full = is_profile_full(existing_profile)
+    print(company_full, profile_full)
+
     job = Job.query.filter_by(company_id=existing_company.id).first()
     return render_template('profile/profile.html',
+                           num_applicants=num_applicants,
+                           profile_full=profile_full,
+                           company_full=company_full,
                            existing_profile=existing_profile,
                            comp=existing_company,
                            jobs=existing_jobs,
@@ -532,13 +602,116 @@ def job_listings():
     profile = load_profile()
     jobs = load_jobs()
     jobs_order = Job.query.filter_by(company_id=company.id).order_by(desc(Job.active)).order_by(desc(Job.time_publish)).all()
-    if request.method == 'POST':
-        print("POST TOGGLE")
+    #if request.method == 'POST':
+    #    print("POST TOGGLE")
     return render_template('profile/job_listings.html',
                            company=company,
                            profile=profile,
                            jobs=jobs_order,
                            logged_in = current_user.is_authenticated)
+
+@app.route('/profile/applicants', methods=['GET', 'POST'])
+@login_required
+def applicants():
+    company = load_company()
+    # Ordered by first active/archived, then by time published
+    jobs = Job.query.filter_by(user_id=current_user.id).order_by(desc(Job.active)).order_by(desc(Job.time_publish)).all()
+    jobs_applicants = {}
+    for job in jobs:
+        jobs_applicants[job.id] = len(Applicant.query.filter_by(job_id=job.id).all())
+    print(jobs_applicants)
+    return render_template('profile/applicants.html',
+                           jobs_applicants=jobs_applicants,
+                           company=company,
+                           jobs=jobs,
+                           logged_in = current_user.is_authenticated)
+
+
+@app.route('/profile/applicants/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def applicants_list(job_id):
+    job = Job.query.filter_by(id=job_id).first()
+    applicants = Applicant.query.filter_by(job_id=job.id).all()
+
+    order = request.args.get('order', None)
+
+    if order == 'alph':
+        applicants = Applicant.query.filter_by(job_id=job.id).order_by(Applicant.a_last_name).all()
+    if order == 'time':
+        applicants = Applicant.query.filter_by(job_id=job.id).order_by(Applicant.time_applied).all()
+    num_applicants = len(applicants)
+    return render_template('profile/applicants_list.html',
+                           order=order,
+                           job=job,
+                           applicants=applicants,
+                           num_applicants=num_applicants,
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/profile/applicants/<int:job_id>order', methods=['GET', 'POST'])
+@login_required
+def order_alph(job_id):
+    return redirect(url_for('applicants_list', job_id=job_id, order='alph'))
+
+@app.route('/profile/applicants/<int:job_id>time', methods=['GET', 'POST'])
+@login_required
+def order_time(job_id):
+    return redirect(url_for('applicants_list', job_id=job_id, order='time'))
+
+
+@app.route('/profile/view_cv/<fileurl>', methods=['GET', 'POST'])
+@login_required
+def view_cv(fileurl):
+    filename = f"{fileurl}.pdf"
+    filepath = f"upload/cv/{filename}"
+    return send_file(filepath, mimetype='application/pdf')
+
+@app.route('/profile/download_cv/<fileurl>', methods=['GET', 'POST'])
+@login_required
+def download_cv(fileurl):
+    filename = f"{fileurl}.pdf"
+    filepath = f"upload/cv/{filename}"
+    return send_file(filepath, as_attachment=True)
+
+@app.route('/profile/download_all_cvs/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def download_all_cvs(job_id):
+    cv_directory = f"upload/cv/"
+    pattern = cv_directory + f"{job_id}*.pdf"
+    cv_files = glob.glob(pattern)
+
+    # Create temporal zip file
+    zip_file_path=f'temporal_files/all_{job_id}_csv.zip'
+    with zipfile.ZipFile(zip_file_path, 'w') as zip_file:
+        for cv_file in cv_files:
+            zip_file.write(cv_file, os.path.basename(cv_file))
+
+    response = send_file(zip_file_path, as_attachment=True)
+    # Remove zip file
+    os.remove(zip_file_path)
+    return response
+
+
+@app.route('/profile/download_excel/<job_id>', methods=['GET', 'POST'])
+@login_required
+def download_excel(job_id):
+    applicants = Applicant.query.filter_by(job_id=job_id).all()
+    print(len(applicants))
+
+    df = pd.DataFrame([{
+        'First Name': applicant.a_first_name,
+        'Last Name': applicant.a_last_name,
+        'Email': applicant.a_email,
+        'Personal Comment': applicant.a_comments,
+        'Time Applied: ': applicant.time_applied.strftime('%d-%m-%Y')
+    } for applicant in applicants])
+
+
+    excel_buffer = BytesIO()
+    df.to_excel(excel_buffer, index=False)
+    excel_buffer.seek(0)
+
+    return send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
+
 
 @app.route('/profile/manage_jobs', methods=['GET', 'POST'])
 @login_required
@@ -651,9 +824,23 @@ def companies():
     filter_conditions_ind = []
     active_jobs_only = False
 
+    # Companies with Full Information
+    companies_full_info = Company.query.filter(and_(
+        Company.url != '',
+        Company.about != '',
+        Company.contact != '',
+        Company.address != ''
+    )).all()
+    companies_full_info_ids = {company.id for company in companies_full_info}
+
     if len(industry) == 0 and len(search) == 0:
         print('NO PARAMS')
-        companies_intersection = Company.query.order_by(Company.name).all()
+        companies_intersection = Company.query.order_by(Company.name).filter(and_(
+            Company.url != '',
+            Company.about != '',
+            Company.contact != '',
+            Company.address != ''
+        )).all()
     else:
         # Existing industry
         if len(industry) > 0:
@@ -676,7 +863,7 @@ def companies():
             if active_jobs_only == True:
                 companies_active_jobs = Company.query.filter(Company.num_of_jobs > 0).order_by(desc(Company.num_of_jobs)).all()
                 comp_active_ids = {company.id for company in companies_active_jobs}
-                common_industry_ids = companies_ids.intersection(comp_active_ids)
+                common_industry_ids = companies_ids.intersection(comp_active_ids, companies_full_info_ids)
                 companies_intersection = Company.query.filter(Company.id.in_(common_industry_ids)).order_by(desc(Company.num_of_jobs)).all()
 
         # Existing Seach
@@ -687,17 +874,20 @@ def companies():
                 Company.contact.like(f"%{search[0]}%"),
                 Company.address.like(f"%{search[0]}%"),
                 Company.industry.like(f"%{search[0]}%"),
-            ))
-            companies_intersection = search_filtered
+            )).all()
+            search_ids = {company.id for company in search_filtered}.intersection(companies_full_info_ids)
+            companies_intersection = Company.query.filter(Company.id.in_(search_ids)).all()
         
         # Existing both industry and search
         if len(search) > 0 and len(industry) > 0:
-            search_ids = {company.id for company in search_filtered}
+            
             common_all_ids = common_industry_ids.intersection(search_ids)
-
             companies_intersection = Company.query.filter(Company.id.in_(common_all_ids)).all()
 
     companies_len = len(companies_intersection)
+
+    
+
     ## ADD PAGINATION
 
     if request.method == 'POST':
@@ -718,6 +908,7 @@ def companies():
     return render_template('companies.html',
                            companies_len=companies_len,
                            url_query=industry,
+                           search_query=search,
                            form=filter_form,
                            industries = company_industries,
                            companies=companies_intersection,
@@ -748,7 +939,7 @@ def job(comp_id, name, job_id):
 @app.route('/job/<int:job_id>')
 def job_clean(job_id):
     job = Job.query.filter_by(id=job_id).first()
-    company = load_company()
+    company = Company.query.filter_by(id=job.company_id).first()
     return render_template('job.html',
                            job=job,
                            company=company,
@@ -758,9 +949,37 @@ def job_clean(job_id):
 def apply(job_id):
     job_id=job_id
     apply_form = ApplyForm()
-    company = load_company()
+    
     job = Job.query.filter_by(id=job_id).first()
-    if request.method == 'POST':
+    company = Company.query.filter_by(id=job.company_id).first()
+
+    if request.method == 'POST' and apply_form.validate_on_submit():
+        print('POST')
+        applicant_number = str(uuid.uuid1())
+        #cv_link_str = f"{job_id}_{company.id}_{company.administrator_id}_{applicant_number}"
+
+        new_applicant = Applicant(
+            a_first_name = request.form['a_first_name'],
+            a_last_name = request.form['a_last_name'],
+            a_email = request.form['a_email'],
+            a_cv_link = f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}",
+            a_comments = request.form['a_comments'],
+            job_id = job_id,
+            administrator_id = company.administrator_id,
+            time_applied = datetime.datetime.now()
+        )
+
+        #CV file name: jobId_companyId_administratorId_email_gmail_com_specialCode.pdf
+
+        db.session.add(new_applicant)
+        db.session.commit()
+
+        file = request.files['a_cv']
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"))
+
         return redirect(url_for('apply_success', job_id=job_id))
 
     return render_template('apply.html',
@@ -772,10 +991,12 @@ def apply(job_id):
 
 @app.route('/job/<int:job_id>/apply/success', methods=['GET', 'POST'])
 def apply_success(job_id):
-    company=load_company()
+    job = Job.query.filter_by(id=job_id).first()
+    company = Company.query.filter_by(id=job.company_id).first()
+    
     return render_template('apply_success.html',
                            company=company,
-                           logged_in = current_user.is_authenticated)
+                           logged_in = current_user.is_authenticated), {"Refresh": "3; url=/board"}
 
 
 if __name__ == "__main__":

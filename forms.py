@@ -163,9 +163,10 @@ class SearchForm(FlaskForm):
     submit = SubmitField('Search')
 
 class ApplyForm(FlaskForm):
-    a_first_name = StringField(u"First Name")
-    a_last_name = StringField(u"Last Name")
-    a_email = StringField(u"Email")
-    a_cv = FileField(u"Upload File")
-    a_comments = StringField(u"First Name")
-    submit = SubmitField('Submit')
+    a_first_name = StringField(u"First Name", validators=[DataRequired()])
+    a_last_name = StringField(u"Last Name", validators=[DataRequired()])
+    a_email = StringField(u"Email", validators=[DataRequired()])
+    a_cv = FileField(u"Upload File", validators=[DataRequired()])
+    a_comments = TextAreaField(u"First Name")
+    agree = BooleanField(u"Blah", validators=[DataRequired()])
+    submit = SubmitField('Submit Application')

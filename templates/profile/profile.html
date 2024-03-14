@@ -6,6 +6,31 @@
         <a href="{{ url_for('profile') }}">Dashboard</a>
     </div>
 
+    {% if profile_full == false or company_full == false %}
+    <div class="row dashboard-notification">
+
+        <div class="row">
+            <p><b>In order to publish job listings, you need to make sure your profile and your company profile are finished.</b></p>
+        </div>
+
+        {% if profile_full == false %}
+            <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column p-3">
+                <p>Finish Your Personal Profile</p>
+                <a href="{{ url_for('edit_user') }}"><button class="btn primary-btn">Finish Profile</button></a>
+            </div>
+        {% endif %}
+
+        {% if company_full == false %}
+            <div class="col-lg-6 col-md-6 col-sm-12 d-flex flex-column p-3">
+                <p>Finish Your Company Profile</p>
+                <a href="{{ url_for('edit_company') }}"><button class="btn primary-btn">Finish Company Profile</button></a>
+            </div>
+        {% endif %}
+
+    </div>
+    <hr class="line">
+    {% endif %}
+
     <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
         <div class="col-lg-5 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
             <h4>Active Jobs</h4>
@@ -20,16 +45,15 @@
     <div class="row justify-content-lg-between justify-content-md-center justify-content-sm-center p-3">
         <div class="col-lg-5 col-md-10 col-sm-12 p-3 mb-5 shadow-strong">
             <h4>Number of Responses</h4>
-            <p class="number-large">0</p>
+            <p class="number-large">{{ num_applicants }}</p>
         </div>
     </div>
-    <hr class="line">
+
+    {% if profile_full == true and company_full == true %}
     <div class="row">
-        <p class="fs-3">Personal Profile</p>
+        <a href="{{ url_for('post_job') }}"><button class="btn primary-btn my-5">Post New Job</button></a>
     </div>
-    <div class="row">
-        <p class="fs-3">Company Profile</p>
-    </div>
+    {% endif %}
 </div>
 
 

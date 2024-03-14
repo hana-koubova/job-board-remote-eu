@@ -839,6 +839,12 @@ section {
 
 }
 
+.dashboard-notification {
+  border: 2px dotted var(--custom-btn-bg-color);
+  border-radius: 5px;
+  padding: 10px;
+}
+
 /*-----JOB MANAGEMENT----*/
 
 .job-actions-list {
@@ -953,6 +959,88 @@ section {
   color: white;
 }
 
-.companies-results {
-  
+.company-card-description {
+  height: 70px;
+  overflow: hidden;
 }
+
+.company-card-fyll-space {
+  height: 50px;
+}
+
+/*-----------------------
+    ABOUT US PAGE
+-------------------------*/
+.about-us h2 {
+  color: white;
+}
+
+/*-----------------------
+      ERRORS
+-------------------------*/
+
+.error-code {
+  font-size: 5em;
+  color: rgb(255, 166, 0);
+}
+
+/*-----------------------
+      APPLICANTS
+-------------------------*/
+
+
+.filters-btn {
+  background-color: #fff;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.filters-btn:active {
+  box-shadow: 0 4px 4px 0 rgb(60 64 67 / 30%), 0 8px 12px 6px rgb(60 64 67 / 15%);
+  outline: none;
+}
+
+.first-row {
+  --bs-table-bg: var(--social-icon-link-bg-color);
+  --bs-table-color: white;
+}
+
+.download-icon {
+  color: var(--primary-color);
+  transition-duration: 200ms;
+}
+
+.download-icon:hover {
+  color: var(--secondary-color);
+  transition-duration: 200ms;
+}
+
+.download-icon:active {
+  color: var(--custom-btn-bg-color);
+}
+
+ @media only screen and (max-width: 850px) {
+  .applicants-table thead {
+    display: none;
+}
+
+.applicants-table td {
+    display: block;
+}
+
+.applicants-table td::before {
+  font-weight: 600;
+}
+
+.applicants-table td[data-th]:before  {
+    content: attr(data-th);
+}
+
+.applicants-table .first-cell {
+  background-color: var(--social-icon-link-bg-color);
+  color: white;
+}
+
+}
+

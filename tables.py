@@ -84,4 +84,6 @@ class Applicant(db.Model):
     a_cv_link: Mapped[str] = mapped_column(String(200))
     a_comments: Mapped[str] = mapped_column(String(300))
     job_id: Mapped[int] = mapped_column(Integer, ForeignKey(Job.id))
-    company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Company.id))
+    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
+    time_applied: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now())

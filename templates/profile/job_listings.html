@@ -1,6 +1,7 @@
 {% extends "base_profile.html" %} {% block profile_content %}
 <section id="job_listings">
     <div class="container">
+        
         <div id="breadcrumbs" class="d-flex my-2">
             <p class="mx-2">></p>
             <a href="{{ url_for('job_listings') }}">Job listings</a>
@@ -107,7 +108,7 @@
                         {% endfor %}
                     {% else %}
                         <p>Empty</p>
-                        <p>Post a Job</p>
+                        <a href="{{ url_for('post_job') }}"><button class="btn primary-btn my-5">Post New Job</button></a>
                     {% endif %}
                     
 
