@@ -2,7 +2,7 @@
 {% from 'bootstrap5/form.html' import render_form %}
 {% block content %}
 
-<section id="register">
+<section id="register" class="full-height">
     <div class="container">
     
         <div class="row d-flex justify-content-center mb-3">
@@ -12,7 +12,7 @@
         </div>
     
         <div class="row d-flex justify-content-center mb-5">
-            <div class="col-lg-6 col-md-10 col-sm-12">
+            <div class="col form-fixed">
     
                 <form method="POST" action="{{ url_for('register') }}"> 
                     {{ form.csrf_token }}

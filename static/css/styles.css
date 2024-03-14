@@ -1,5 +1,5 @@
 /*---------------------------------------
-  CUSTOM PROPERTIES ( VARIABLES )             
+     CUSTOM PROPERTIES ( VARIABLES )             
 -----------------------------------------*/
 :root {
     --white-color:                  #ffffff;
@@ -22,7 +22,7 @@
   }
 
   /*---------------------------------------
-  TYPOGRAPHY               
+            TYPOGRAPHY               
 -----------------------------------------*/
 h1,
 h2,
@@ -56,7 +56,7 @@ nav a:hover, footer a:hover {
 
 
 /*---------------------------------------
-  SECTION               
+           SECTION               
 -----------------------------------------*/
 
 section {
@@ -224,7 +224,7 @@ section {
 
 
 /*---------------------------------------
-  HERO              
+           HERO              
 -----------------------------------------*/
 
 .hero-section {
@@ -367,7 +367,7 @@ section {
 
 
   /*---------------------------------------
-  CATEGORIES              
+          CATEGORIES              
 -----------------------------------------*/
 
 .white-div {
@@ -441,7 +441,7 @@ section {
 }
 
 /*-------------------------------------
-   JOB BOARD
+        JOB BOARD
 -----------------------------------*/
 
 .job-board-dat {
@@ -458,7 +458,7 @@ section {
   }
 
   /*---------------------------------------
-  JOB CARD           
+        JOB CARD           
 -----------------------------------------*/
 
 .recent-jobs-bottom .custom-btn {
@@ -649,9 +649,9 @@ section {
 }
 
 
-  /*---------------------------------------
-  CTA               
------------------------------------------*/
+  /*----------------------------
+             CTA               
+------------------------------*/
 .cta-section {
     background-image: url('../images/millennial-group-young-businesspeople.jpg');
     background-repeat: no-repeat;
@@ -1042,5 +1042,20 @@ section {
   color: white;
 }
 
+}
+
+
+/*-----------------------
+    LOGIN / REGISTER
+-------------------------*/
+
+.form-fixed {
+  max-width: 375px;
+}
+
+.full-height {
+  height: 75vh;
+  display: flex;
+  place-items: center;
 }
 

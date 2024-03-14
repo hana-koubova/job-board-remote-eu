@@ -154,13 +154,13 @@
                 <p class="text-white">We are building seamless remote work solutions for European companies. Try it today and find your next star employee.</p>
             </div>
 
-            <div class="col-lg-4 col-12 ms-auto">
-                <div class="custom-border-btn-wrap d-flex align-items-center mt-lg-4 mt-2">
+            <div class="col-lg-6 col-12">
+                <div class="d-flex justify-content-center my-4">
                     {% if logged_in %}
                     <a href="{{ url_for('post_job') }}" class="white-btn btn m-4">Post a job</a>
                     {% else %}
-                    <a href="#" class="white-btn btn m-4">Create an account</a>
-                    <a href="#" class="white-btn btn m-4">Log In</a>
+                    <a href="{{ url_for('register') }}" class="white-btn btn m-4">Create an account</a>
+                    <a href="{{ url_for('login') }}" class="white-btn btn m-4">Log In</a>
                     {% endif %}
                     
                 </div>

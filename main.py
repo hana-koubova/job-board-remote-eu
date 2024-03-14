@@ -709,8 +709,10 @@ def download_excel(job_id):
     excel_buffer = BytesIO()
     df.to_excel(excel_buffer, index=False)
     excel_buffer.seek(0)
-
-    return send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
+    
+    response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
+    excel_buffer.close()
+    return response
 
 
 @app.route('/profile/manage_jobs', methods=['GET', 'POST'])
