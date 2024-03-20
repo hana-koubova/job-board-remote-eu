@@ -82,8 +82,8 @@ csrf.init_app(app)
 ## CREATE DATABASE
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['DATABASE_URL']
-app.config['DATABASE_URL_UNPOOLED']
+app.config['DATABASE_URL'] = 'postgres://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config['DATABASE_URL_UNPOOLED'] = 'postgres://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require'
 db.init_app(app)
 
 ## Configure logging manager
