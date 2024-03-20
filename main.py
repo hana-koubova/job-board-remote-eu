@@ -105,15 +105,15 @@ with app.app_context():
 def handle_404_error(err):
     return render_template('404.html')
 
-#@app.errorhandler(Exception)
-#def handle_exception(err):
-#    # pass through HTTP errors
-#    if isinstance(err, HTTPException):
-#        return err
-#
-#    # now you're handling non-HTTP exceptions only
-#    return render_template("500.html",
-#                           err=err), 500
+@app.errorhandler(Exception)
+def handle_exception(err):
+    # pass through HTTP errors
+    if isinstance(err, HTTPException):
+        return err
+
+    # now you're handling non-HTTP exceptions only
+    return render_template("500.html",
+                           err=err), 500
 
 
 ## Routing
