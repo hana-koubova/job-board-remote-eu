@@ -81,7 +81,9 @@ csrf.init_app(app)
 
 ## CREATE DATABASE
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['DATABASE_URL']
+app.config['DATABASE_URL_UNPOOLED']
 db.init_app(app)
 
 ## Configure logging manager
