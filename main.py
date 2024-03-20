@@ -72,8 +72,8 @@ def allowed_file(filename):
 bootstrap = Bootstrap5(app)
 ## To generate random key
 #secret_key = uuid.uuid4().hex
-app.config.from_prefixed_env()
-app.config['SECRET_KEY']
+#app.config.from_prefixed_env()
+app.config['SECRET_KEY'] = "287286a1716e47b1a244016e3763fb22"
 
 ## CSFP protection
 csrf = CSRFProtect(app)
