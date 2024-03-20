@@ -8,6 +8,12 @@ import zipfile
 import pandas as pd
 from io import BytesIO
 
+## Neon
+
+import psycopg2
+from sqlalchemy import create_engine
+
+
 ## Flask
 
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory
@@ -99,6 +105,10 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
+
+## Neon dat
+conn_str = "postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+engine = create_engine(conn_str)
 
 
 ## Errors
