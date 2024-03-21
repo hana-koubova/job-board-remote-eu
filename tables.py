@@ -1,5 +1,5 @@
 from database import db
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from flask_login import UserMixin
 from sqlalchemy import Integer, String, ForeignKey, Boolean, DateTime
@@ -11,6 +11,14 @@ class User1(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String(100))
     company: Mapped[str] = mapped_column(String(100))
 
+    #profile_data: Mapped[list["PersonalProfile"]] = relationship(back_populates="status", passive_deletes=True, cascade="delete-orphan")
+
+    #company_data: Mapped[list["Company"]] = relationship(back_populates="status", passive_deletes=True, cascade="delete-orphan")
+
+    #job_data: Mapped[list["Job"]] = relationship(back_populates="status", passive_deletes=True, cascade="delete-orphan")
+
+    #applicant_data: Mapped[list["Applicant"]] = relationship(back_populates="status", passive_deletes=True, cascade="delete-orphan")
+
     def remove(self):
         db.session.delete(self)
 
@@ -21,6 +29,7 @@ class PersonalProfile(db.Model):
     l_name: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(100))
     about: Mapped[str] = mapped_column(String(500))
+    #status: Mapped["User1"] = relationship(back_populates="profile_data", passive_deletes=True)
 
 class Company(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -33,7 +42,8 @@ class Company(db.Model):
     num_of_jobs: Mapped[int] = mapped_column(Integer)
     num_of_hidden_jobs: Mapped[int] = mapped_column(Integer)
     address: Mapped[str] = mapped_column(String(100))
-    administrator_id: Mapped[int] = mapped_column(Integer)
+    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
+    #status: Mapped["User1"] = relationship(back_populates="company_data", passive_deletes=True)
 
     def add_job(self):
         self.num_of_jobs += 1
@@ -71,6 +81,7 @@ class Job(db.Model):
         DateTime(timezone=True), server_default=func.now())
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Company.id))
+    #status: Mapped["User1"] = relationship(back_populates="job_data")
 
     def recover_job(self):
         self.time_publish = datetime.datetime.now()
@@ -84,6 +95,8 @@ class Applicant(db.Model):
     a_cv_link: Mapped[str] = mapped_column(String(200))
     a_comments: Mapped[str] = mapped_column(String(300))
     job_id: Mapped[int] = mapped_column(Integer, ForeignKey(Job.id))
-    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
+    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id,))
     time_applied: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())
+    #status: Mapped["User1"] = relationship(back_populates="applicant_data")
+    

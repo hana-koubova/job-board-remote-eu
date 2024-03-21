@@ -44,7 +44,7 @@ from sqlalchemy import and_, select, or_, func, desc
 
 ## Modules
 
-from helper import url_friendly, load_user, load_profile, load_company, load_jobs, load_applicants, get_categories, is_company_full, is_profile_full
+from helper import url_friendly, load_profile, load_company, load_jobs, load_applicants, get_categories, is_company_full, is_profile_full
 
 ## Tables and Forms
 
@@ -88,8 +88,8 @@ csrf.init_app(app)
 ## CREATE DATABASE
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require'
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/job-board?sslmode=require'
+#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 
@@ -132,7 +132,7 @@ def handle_exception(err):
 ## Routing
 #@app.route('/', methods=['GET', 'POST'])
 #def home_old():
-#    return 'Hello World'
+#    return render_template('index.html')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -812,16 +812,28 @@ def edit_job(job_id):
 def delete_account():
     delete_form = DeleteForm()
     if delete_form.validate_on_submit() and request.method == "POST":
+
+        # deleting user
         user_to_delete = User1.query.filter_by(id=current_user.id).first()
         db.session.delete(user_to_delete)
+
         # relevant company to delete
-        if bool(Company.query.filter_by(administrator_id=current_user.id).first()):
-            company_to_delete = Company.query.filter_by(administrator_id=current_user.id).first()
-            db.session.delete(company_to_delete)
-        # relevant profile to delete
-        if bool(PersonalProfile.query.filter_by(user_id=current_user.id).first()):
-            profile_to_delete = PersonalProfile.query.filter_by(user_id=current_user.id).first()
-            db.session.delete(profile_to_delete)
+        company_to_delete = Company.query.filter_by(administrator_id=current_user.id).first()
+        db.session.delete(company_to_delete)
+
+        ## relevant profile to delete
+        profile_to_delete = PersonalProfile.query.filter_by(user_id=current_user.id).first()
+        db.session.delete(profile_to_delete)
+
+        # relevalt jobs to delete if exist
+        if bool(Job.query.filter_by(user_id=current_user.id).first()):
+            jobs_to_delete = Job.query.filter_by(user_id=current_user.id).all()
+            db.session.deletre(jobs_to_delete)
+
+        # relevant applicants to delete if exist
+        if bool(Applicant.query.filter_by(administrator_id=current_user.id).first()):
+            applicants_to_delete = Applicant.query.filter_by(administrator_id=current_user.id).all()
+            db.session.delete(applicants_to_delete)
         db.session.commit()
         logout_user()
         return redirect(url_for('home'))
