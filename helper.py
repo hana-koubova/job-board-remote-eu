@@ -1,5 +1,5 @@
 import re
-from tables import User, PersonalProfile, Company, Job, Applicant
+from tables import User1, PersonalProfile, Company, Job, Applicant
 from flask_login import current_user
 from sqlalchemy import and_
 
@@ -8,7 +8,7 @@ def url_friendly(str):
     return new_str
 
 def load_user():
-    user = User.query.filter_by(id=current_user.id).first()
+    user = User1.query.filter_by(id=current_user.id).first()
     return user
 
 def load_profile():

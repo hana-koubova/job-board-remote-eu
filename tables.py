@@ -5,7 +5,7 @@ from flask_login import UserMixin
 from sqlalchemy import Integer, String, ForeignKey, Boolean, DateTime
 import datetime
 
-class User(UserMixin, db.Model):
+class User1(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password: Mapped[str] = mapped_column(String(100))
@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
 
 
 class PersonalProfile(db.Model):
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id), primary_key=True)
     f_name: Mapped[str] = mapped_column(String(100))
     l_name: Mapped[str] = mapped_column(String(100))
     role: Mapped[str] = mapped_column(String(100))
@@ -69,7 +69,7 @@ class Job(db.Model):
     active: Mapped[bool] = mapped_column(Boolean())
     time_publish: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Company.id))
 
     def recover_job(self):
@@ -84,6 +84,6 @@ class Applicant(db.Model):
     a_cv_link: Mapped[str] = mapped_column(String(200))
     a_comments: Mapped[str] = mapped_column(String(300))
     job_id: Mapped[int] = mapped_column(Integer, ForeignKey(Job.id))
-    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
+    administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
     time_applied: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())

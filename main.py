@@ -48,7 +48,7 @@ from helper import url_friendly, load_user, load_profile, load_company, load_job
 
 ## Tables and Forms
 
-from tables import User, PersonalProfile, Company, Job, Applicant
+from tables import User1, PersonalProfile, Company, Job, Applicant
 from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar
 
 ## Internal
@@ -88,9 +88,10 @@ csrf.init_app(app)
 ## CREATE DATABASE
 
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['DATABASE_URL'] = 'postgres://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
-app.config['DATABASE_URL_UNPOOLED'] = 'postgres://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+
 
 ## Configure logging manager
 
@@ -101,14 +102,14 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.get_or_404(User, user_id)
+    return db.get_or_404(User1, user_id)
 
 with app.app_context():
     db.create_all()
 
 ## Neon dat
-conn_str = "postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require"
-engine = create_engine(conn_str)
+#conn_str = "postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+#engine = create_engine(conn_str)
 
 
 ## Errors
@@ -129,9 +130,13 @@ def handle_exception(err):
 
 
 ## Routing
+#@app.route('/', methods=['GET', 'POST'])
+#def home_old():
+#    return 'Hello World'
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    print('HELLO')
     five_recent_jobs = Job.query.order_by(Job.time_publish).all()[:5]
     print(len(five_recent_jobs))
     form = SearchForm()
@@ -427,7 +432,7 @@ def register():
     if registration_form.validate_on_submit() and request.method == 'POST':
             # Check if email exists
             email = request.form['email']
-            exists = User.query.filter_by(email=email).first()
+            exists = User1.query.filter_by(email=email).first()
 
             if exists != None:
                 error = 'This Email already exists in our database.'
@@ -438,7 +443,7 @@ def register():
                     method='pbkdf2:sha256',
                     salt_length=8
                 )
-                new_user = User(email=request.form['email'],
+                new_user = User1(email=request.form['email'],
                     password=hash_and_salted_password,
                     company=request.form['company'])
             
@@ -495,7 +500,7 @@ def login():
         password = request.form['password']
      
         # Find user by email
-        result = db.session.execute(db.select(User).where(User.email == email))
+        result = db.session.execute(db.select(User1).where(User1.email == email))
         user = result.scalar()
 
         # Check password hash
@@ -807,7 +812,7 @@ def edit_job(job_id):
 def delete_account():
     delete_form = DeleteForm()
     if delete_form.validate_on_submit() and request.method == "POST":
-        user_to_delete = User.query.filter_by(id=current_user.id).first()
+        user_to_delete = User1.query.filter_by(id=current_user.id).first()
         db.session.delete(user_to_delete)
         # relevant company to delete
         if bool(Company.query.filter_by(administrator_id=current_user.id).first()):
