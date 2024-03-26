@@ -5,7 +5,7 @@ import json
 import os
 import glob
 import zipfile
-import pandas as pd
+#import pandas as pd
 from io import BytesIO
 import sys
 import requests
@@ -818,22 +818,22 @@ def download_excel(job_id):
     applicants = Applicant.query.filter_by(job_id=job_id).all()
     print(len(applicants))
 
-    df = pd.DataFrame([{
-        'First Name': applicant.a_first_name,
-        'Last Name': applicant.a_last_name,
-        'Email': applicant.a_email,
-        'Personal Comment': applicant.a_comments,
-        'Time Applied: ': applicant.time_applied.strftime('%d-%m-%Y')
-    } for applicant in applicants])
+    #df = pd.DataFrame([{
+    #    'First Name': applicant.a_first_name,
+    #    'Last Name': applicant.a_last_name,
+    #    'Email': applicant.a_email,
+    #    'Personal Comment': applicant.a_comments,
+    #    'Time Applied: ': applicant.time_applied.strftime('%d-%m-%Y')
+    #} for applicant in applicants])
 
 
-    excel_buffer = BytesIO()
-    df.to_excel(excel_buffer, index=False)
-    excel_buffer.seek(0)
+    #excel_buffer = BytesIO()
+    #df.to_excel(excel_buffer, index=False)
+    #excel_buffer.seek(0)
     
-    response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
+    #response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
     #excel_buffer.close()
-    return response
+    #return response
 
 
 @app.route('/profile/manage_jobs', methods=['GET', 'POST'])
