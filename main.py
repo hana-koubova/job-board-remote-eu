@@ -87,7 +87,8 @@ bootstrap = Bootstrap5(app)
 
 #secret_key = uuid.uuid4().hex
 #app.config.from_prefixed_env()
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+#app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+app.config['SECRET_KEY'] = '287286a1716e47b1a244016e3763fb22'
 
 ## Blop storage
 blob_token = os.environ.get('BLOB_READ_WRITE_TOKEN')
