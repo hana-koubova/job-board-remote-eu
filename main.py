@@ -7,16 +7,22 @@ import glob
 import zipfile
 import pandas as pd
 from io import BytesIO
+import sys
+import requests
+import boto3
 
 ## Neon
 
 import psycopg2
 from sqlalchemy import create_engine
 
+## Blob
+
+#from vercel_storage.vercel_storage import blob
 
 ## Flask
 
-from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory
+from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory, make_response
 import flask_excel as excel
 
 ## Login and security
@@ -76,10 +82,29 @@ def allowed_file(filename):
 ## Bootsrap
 
 bootstrap = Bootstrap5(app)
+
 ## To generate random key
+
 #secret_key = uuid.uuid4().hex
 #app.config.from_prefixed_env()
-app.config['SECRET_KEY'] = "287286a1716e47b1a244016e3763fb22"
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY')
+
+## Blop storage
+blob_token = os.environ.get('BLOB_READ_WRITE_TOKEN')
+
+blob_url_base = 'https://blob.vercel-storage.com'
+blob_cv_folder = 'uploaded_cvs'
+blob_logos_folder = 'uploaded_logos'
+
+## AWS S3
+bucket_name = 'job-board-remote-eu-storage'
+cvs_folder = 'uploaded_cvs'
+logos_folder = 'uploaded_logos'
+
+def get_client():
+    return boto3.client('s3',
+        aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
 ## CSFP protection
 csrf = CSRFProtect(app)
@@ -107,10 +132,6 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-## Neon dat
-#conn_str = "postgresql://neondb_owner:4slSQ8XqNYxm@ep-sweet-mode-a2vbydq9.eu-central-1.aws.neon.tech/neondb?sslmode=require"
-#engine = create_engine(conn_str)
-
 
 ## Errors
     
@@ -118,15 +139,15 @@ with app.app_context():
 def handle_404_error(err):
     return render_template('404.html')
 
-@app.errorhandler(Exception)
-def handle_exception(err):
-    # pass through HTTP errors
-    if isinstance(err, HTTPException):
-        return err
-
-    # now you're handling non-HTTP exceptions only
-    return render_template("500.html",
-                           err=err), 500
+#@app.errorhandler(Exception)
+#def handle_exception(err):
+#    # pass through HTTP errors
+#    if isinstance(err, HTTPException):
+#        return err
+#
+#    # now you're handling non-HTTP exceptions only
+#    return render_template("500.html",
+#                           err=err), 500
 
 
 ## Routing
@@ -676,19 +697,101 @@ def order_time(job_id):
     return redirect(url_for('applicants_list', job_id=job_id, order='time'))
 
 
-@app.route('/profile/view_cv/<fileurl>', methods=['GET', 'POST'])
+@app.route('/profile/view_cv_old/<fileurl>', methods=['GET', 'POST'])
 @login_required
-def view_cv(fileurl):
+def view_cv_old(fileurl):
     filename = f"{fileurl}.pdf"
-    filepath = f"upload/cv/{filename}"
-    return send_file(filepath, mimetype='application/pdf')
+    #filepath = f"upload/cv/{filename}" ## local storage
 
-@app.route('/profile/download_cv/<fileurl>', methods=['GET', 'POST'])
+    headers = {
+        #'cache-control': 'public, max-age=31536000, s-maxage=300',
+        #'content-type': 'application/pdf',
+        #'pathname': f'{prefix}{filename}',
+        #'content-disposition': 'inline; filename="1_6_6_koubovahan_gmail_com_c00b29c8-ea94-11ee-befb-aa791e0b70df.pdf"',
+        'authorization': f"Bearer vercel_blob_rw_kcMBvqxmhGJEokd4_4ZogufyIThciu4tgYdQSwA6Ubn6cBg"
+        }
+    options = {   
+        'token': 'vercel_blob_rw_kcMBvqxmhGJEokd4_4ZogufyIThciu4tgYdQSwA6Ubn6cBg'
+    }
+    response = requests.get(f"{blob_url_base}/{blob_cv_folder}/{filename}", headers=headers)
+
+    #resp = make_response(f"{url_base}/{folder}", headers=headers)
+    #resp.headers['Content-Disposition'] = f'inline; filename={filename}'
+    #resp.headers['Content-Type'] = 'application/pdf'
+    #resp.headers['authorization'] = "Bearer vercel_blob_rw_kcMBvqxmhGJEokd4_4ZogufyIThciu4tgYdQSwA6Ubn6cBg"
+    
+    #resp = blob.list(options=options)
+    print('Status code: ', response.status_code)
+    print('Headers: ', response.headers)
+    print('Content: ', response.content)
+    
+    data = json.loads(response.content)
+    blobs = data['blobs']
+    for blob in blobs:
+        if blob['pathname'].endswith(filename):
+            url_cv = blob['url']
+            print("Matching URL:", url_cv)
+            break
+        else:
+            print("File not found.")
+
+    #return send_file(url_cv, mimetype='application/pdf')
+    #return resp
+    return redirect(url_cv)
+
+    
+@app.route('/profile/test_pdf', methods=['GET', 'POST'])
 @login_required
-def download_cv(fileurl):
-    filename = f"{fileurl}.pdf"
-    filepath = f"upload/cv/{filename}"
-    return send_file(filepath, as_attachment=True)
+def view_cv_embed():
+    return render_template('profile/cv_page.html')
+
+@app.route('/profile/view_cv/<fileurl>/<job_id>', methods=['GET', 'POST'])
+@login_required
+def view_cv(fileurl, job_id):
+    file_key = f'{cvs_folder}/{job_id}/{fileurl}.pdf'
+    s3 = get_client()
+    file = s3.get_object(Bucket=bucket_name, Key=file_key)
+    response = make_response(file['Body'].read())
+    response.headers['Content-Type'] = 'application/pdf'
+    return response
+
+
+@app.route('/profile/download_cv/<fileurl>/<job_id>', methods=['GET', 'POST'])
+@login_required
+def download_cv(fileurl, job_id):
+    #filename = f"{fileurl}.pdf"
+
+    file_key = f'{cvs_folder}/{job_id}/{fileurl}.pdf'
+    s3 = get_client()
+    file = s3.get_object(Bucket=bucket_name, Key=file_key)
+    response = make_response(file['Body'].read())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers["Content-Disposition"] = f"attachment;filename={fileurl}.pdf"
+    return response
+
+    ## for local storage
+    #filepath = f"upload/cv/{filename}"
+    #return send_file(filepath, as_attachment=True)
+
+    ## Blob storage
+    #headers = {
+    #    'authorization': f"Bearer {blob_token}"
+    #}
+
+    #response = requests.get(f"{blob_url_base}/{blob_cv_folder}/{filename}", headers=headers)
+    #print('Content: ', response.content)
+    #data = json.loads(response.content)
+
+    # Find equal file
+    #blobs = data['blobs']
+    #for blob in blobs:
+    #    if blob['pathname'].endswith(filename):
+    #        url_cv = blob['url']
+    #        print("Matching URL:", url_cv)
+    #        return redirect(url_cv)
+    #return "File not found."
+    
+
 
 @app.route('/profile/download_all_cvs/<int:job_id>', methods=['GET', 'POST'])
 @login_required
@@ -729,7 +832,7 @@ def download_excel(job_id):
     excel_buffer.seek(0)
     
     response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
-    excel_buffer.close()
+    #excel_buffer.close()
     return response
 
 
@@ -1004,13 +1107,42 @@ def apply(job_id):
         #CV file name: jobId_companyId_administratorId_email_gmail_com_specialCode.pdf
 
         db.session.add(new_applicant)
-        db.session.commit()
-
+        
+        base_url = 'https://blob.vercel-storage.com'
         file = request.files['a_cv']
+        path_storage = 'uploaded_cvs'
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"))
+        ## Local storage upload
+        #if file and allowed_file(file.filename):
+        #    filename = secure_filename(file.filename)
+        #    file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"))
+
+        file_path = f"{cvs_folder}/{job_id}/{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"
+
+        ## With vercel_storage package vercel_storage.vercel_storage
+        #resp = blob.put(
+        #        pathname=file_path,
+        #        body=file.read(),
+        #        options={'token': ''}
+        #    )
+
+        ## To Vercel Blob Storage
+        #headers = {
+        #    "access": "public",
+        #    "authorization": "Bearer",
+        #    "x-content-type": 'application/pdf',
+        #    "content-disposition": 'attachment/inline; filename="filename.extension"',
+        #}
+
+        #requests.put(f"{base_url}/{path_storage}/{file_path}", data=file.read(), headers=headers)
+
+        ## To Amazon AWS S3
+        s3 = get_client()
+        s3.upload_fileobj(file, bucket_name, file_path)
+        #with open('file', 'rb') as data:
+        #    s3.upload_fileobj(data, bucket_name, file_path)
+        
+        db.session.commit()
 
         return redirect(url_for('apply_success', job_id=job_id))
 
