@@ -23,7 +23,7 @@ from sqlalchemy import create_engine
 ## Flask
 
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory, make_response
-import flask_excel as excel
+#import flask_excel as excel
 
 ## Login and security
 
