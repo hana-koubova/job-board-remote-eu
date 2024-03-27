@@ -9,13 +9,13 @@
             <p class="mx-2"><b>></b></p>
             <a href="{{ url_for('job_listings') }}"><p><b>Job listings</b></p></a>
             <p class="mx-2"><b>></b></p>
-            <a href="{{ url_for('edit_job', job_id = job.id) }}"><p><b>Edit job</b></p></a>
+            <a href="{{ url_for('edit_job', job_id=job.id) }}"><p><b>Edit job</b></p></a>
         </div>
 
         <div class="row d-flex justify-content-center mb-3 mt-5 pt-5">
             <div class="col-lg-10 col-md-12 col-sm-12">
 
-    <form class="edit_job" method="POST" action="{{ url_for('job_listings') }}">
+    <form class="edit_job" method="POST" action="{{ url_for('edit_job', job_id=job.id) }}">
         <p>{{job.id}}</p>  
         
         {{ form.csrf_token }}
@@ -51,7 +51,7 @@
             <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
                 <div class="input-group">
                     <span class="input-group-text" id="basic-addon1">Job Type</span>
-                    <select name="category" id="category" class="form-control form-select">
+                    <select name="job_type" id="job_type" class="form-control form-select">
                         {% for job_type in job_types %}
                             {% if job.job_type == job_type %}
                                 <option selected>{{ job_type }}</option>

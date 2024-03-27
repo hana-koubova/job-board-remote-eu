@@ -891,7 +891,9 @@ def edit_job(job_id):
     job_to_edit = Job.query.filter_by(id=job_id).first()
     job_edit_form = JobForm()
     if job_edit_form.validate_on_submit() and request.method == 'POST':
-        job_to_edit.role =request.form['role']
+        print('POST')
+        job_to_edit.role = request.form['role']
+
         job_to_edit.salary= request.form['salary']
         job_to_edit.start_date = request.form['start_date']
         job_to_edit.job_type = request.form['job_type']
@@ -909,7 +911,6 @@ def edit_job(job_id):
                            categories=job_categories_full,
                            job_types=job_types_full,
                            logged_in = current_user.is_authenticated)
-
 
 @app.route('/delete_account', methods=['GET', 'POST'])
 @login_required

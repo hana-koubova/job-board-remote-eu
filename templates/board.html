@@ -116,7 +116,7 @@
                                 </h4>
     
                                 <div class="d-flex flex-wrap align-items-center">
-                                    <p class="m-1 border">{{ job.time_publish }}</p>
+                                    <p class="m-1 border">{{ job.time_publish.strftime('%d-%m-%Y') }}</p>
                                     <!--<p class="m-1 border">{{ job.salary }}</p>-->
                                     <p class="m-1 border">{{ job.level }}</p>
                                     <p class="m-1 border">{{ job.job_type }}</p>

@@ -44,7 +44,7 @@ def is_company_full(company):
         return True
     
 def is_profile_full(profile):
-    if profile.f_name == '' or profile.l_name == '' or profile.role == '' or profile.about == '':
+    if profile.f_name == '' or profile.l_name == '' or profile.role == '':
         print("User needs to finish profile")
         return False
     else:
