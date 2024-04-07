@@ -119,16 +119,17 @@
     </div>
     
 </div>
-{{ ckeditor.load() }}
+{{ ckeditor.load(custom_url=url_for('static', filename='ckeditor/ckeditor.js')) }}
 {{ ckeditor.config(name="job_info",
                     custom_config="
                         scayt_autoStartup:true,
-                        toolbar: [
-                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
-                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
-                            { name: 'editing', items: [ 'Scayt' ]}
-                    
-                        ]") }}
+                        wordcount: {
+                            showCharCount:true,
+                            showParagraphs:false,
+                            showWordCount:false,
+                            maxCharCount: 2000
+                        }
+                        ") }}
 
 {% endif %}
 </div>

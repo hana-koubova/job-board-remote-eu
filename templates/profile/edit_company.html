@@ -68,6 +68,7 @@
                             {{ form.address(value=existing_company.address, class_="form-control") }}
                         </div>
                     </div>
+                    <!--About-->
                     {{ form.about.label(class="form-label") }}
                     <br>
                     {{ ckeditor.create(value=existing_company.about, name="about") }}
@@ -83,16 +84,31 @@
     </div>
 </section>
 
-{{ ckeditor.load() }}
+<!--{{ ckeditor.load() }}-->
+{{ ckeditor.load(custom_url=url_for('static', filename='ckeditor/ckeditor.js')) }}
 {{ ckeditor.config(name="about",
                     custom_config="
                         scayt_autoStartup:true,
-                        toolbar: [
-                            { name: 'basicstyles', items: [ 'Bold', 'Italic']},
-                            { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
-                            { name: 'editing', items: [ 'Scayt' ]}
-                    
-                        ]") }}
-
-
+                        wordcount: {
+                            showCharCount:true,
+                            showParagraphs:false,
+                            showWordCount:false,
+                            maxCharCount: 2000
+                        }
+                        ") }}
+<!--{{ ckeditor.config(name="about",
+                        custom_config="
+                            scayt_autoStartup:true,
+                            wordcount: {
+                                showCharCount:true,
+                                showParagraphs:false,
+                                showWordCount:false
+                            },
+                            toolbar: [
+                                { name: 'basicstyles', items: [ 'Bold', 'Italic']},
+                                { name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-']},
+                                { name: 'editing', items: [ 'Scayt' ]}
+                        
+                            ]
+                            ") }}-->
 {% endblock %}

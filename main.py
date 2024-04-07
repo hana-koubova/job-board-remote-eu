@@ -75,6 +75,10 @@ ALLOWED_EXTENSIONS = {'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 1000 * 1000 ## 1Mb
 
+## CKeditor config
+
+#app.config['CKEDITOR_EXTRA_PLUGINS'] = ['wordcount']
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -610,7 +614,7 @@ def setting():
     return render_template('profile/setting.html',
                            logged_in = current_user.is_authenticated)
 
-@app.route('/prifile/edit/company', methods=['GET', 'POST'])
+@app.route('/profile/edit/company', methods=['GET', 'POST'])
 @login_required
 def edit_company():
         existing_company = Company.query.filter_by(administrator_id=current_user.id).first()

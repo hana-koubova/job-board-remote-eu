@@ -1,5 +1,6 @@
 /templates/archived
 /static/other
+/static/ckeditor
 /.venv
 requirements_old.txt
 /__pycache__
