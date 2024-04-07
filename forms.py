@@ -32,7 +32,7 @@ class CompanyForm(FlaskForm):
     industry = SelectField(u"Industry", validators=[DataRequired()], choices=company_industries_full, coerce=str)
     contact = StringField(u"Contact", validators=[Length(max=100)])
     address = StringField(u"Address", validators=[Length(max=100)])
-    about = CKEditorField(u"About", validators=[Length(max=1000)])
+    about = CKEditorField(u"About", validators=[Length(max=3000)])
     submit = SubmitField(label='Submit Information')
 
 class DeleteForm(FlaskForm):

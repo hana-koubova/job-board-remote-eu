@@ -37,7 +37,7 @@ class Company(db.Model):
     name_slug: Mapped[str] = mapped_column(String(100))
     url: Mapped[str] = mapped_column(String(300))
     industry: Mapped[str] = mapped_column(String(100))
-    about: Mapped[str] = mapped_column(String(2000))
+    about: Mapped[str] = mapped_column(String(3000))
     contact: Mapped[str] = mapped_column(String(100))
     num_of_jobs: Mapped[int] = mapped_column(Integer)
     num_of_hidden_jobs: Mapped[int] = mapped_column(Integer)
