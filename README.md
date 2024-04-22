@@ -17,5 +17,5 @@ While searching for remote jobs in my home country, I noticed that there is a la
 
 ## Demo puslished through Vercel
 
-[https://job-board-remote-eu.vercel.app/] (https://job-board-remote-eu.vercel.app/)
+https://job-board-remote-eu.vercel.app/
 
