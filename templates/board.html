@@ -106,7 +106,11 @@
 
                     <div class="job-thumb d-flex position-relative">
                         <div class="job-image-wrap bg-white shadow-lg">
-                            <img src="" class="job-image" alt="">
+                            <!--If logo uploaded-->
+                            {% if job.company_id in companies_w_logos %}
+                                <img src="https://job-board-remote-eu-logos.s3.eu-north-1.amazonaws.com/{{job.company_id}}/logo" alt="company logo" width="80" height="80">
+                            {% endif %}
+                            
                         </div>
     
                         <div class="job-body d-flex flex-wrap flex-auto align-items-center ms-4">
@@ -116,10 +120,10 @@
                                 </h4>
     
                                 <div class="d-flex flex-wrap align-items-center">
-                                    <p class="m-1 border">{{ job.time_publish.strftime('%d-%m-%Y') }}</p>
+                                    <p class="m-1">{{ job.time_publish.strftime('%d-%m-%Y') }}</p>
                                     <!--<p class="m-1 border">{{ job.salary }}</p>-->
-                                    <p class="m-1 border">{{ job.level }}</p>
-                                    <p class="m-1 border">{{ job.job_type }}</p>
+                                    <p class="m-1">{{ job.level }}</p>
+                                    <p class="m-1">{{ job.job_type }}</p>
                                 </div>
                             </div>
                         </div>

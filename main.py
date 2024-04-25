@@ -55,7 +55,7 @@ from helper import url_friendly, load_profile, load_company, load_jobs, load_app
 ## Tables and Forms
 
 from tables import User1, PersonalProfile, Company, Job, Applicant
-from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar
+from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar, LogoForm
 
 ## Internal
 
@@ -103,6 +103,7 @@ blob_logos_folder = 'uploaded_logos'
 
 ## AWS S3
 bucket_name = 'job-board-remote-eu-storage'
+bucket_logos = 'job-board-remote-eu-logos'
 cvs_folder = 'uploaded_cvs'
 logos_folder = 'uploaded_logos'
 
@@ -165,6 +166,16 @@ def home():
     print('HELLO')
     five_recent_jobs = Job.query.order_by(Job.time_publish).all()[:5]
     print(len(five_recent_jobs))
+
+    ## Companies with logos
+    companies_w_logos = []
+    companies = Company.query.all()
+    for company in companies:
+     if company.has_logo == True:
+         companies_w_logos.append(company.id)
+    
+    print(companies_w_logos)
+
     form = SearchForm()
 
     if request.method == 'POST':
@@ -176,6 +187,7 @@ def home():
                            jobs=five_recent_jobs,
                            job_categories=job_categories_promo,
                            links=job_promo_links,
+                           companies_w_logos=companies_w_logos,
                            logged_in = current_user.is_authenticated)
 
 ITEMS = list(range(1, 101))
@@ -248,7 +260,8 @@ def board():
             common_category_ids = job_ids.intersection(type_ids, level_ids)
 
             jobs_intersection = Job.query.filter(Job.id.in_(common_category_ids)).order_by(desc(Job.time_publish)).all()
-        
+            
+
         # Existing search
         if len(search) > 0:
             print("SEARCH DETECTED")
@@ -272,6 +285,17 @@ def board():
 
     print('JOBS LEN: ', len(jobs_intersection))
     jobs_len = len(jobs_intersection)
+    print(jobs_intersection)
+
+    ## Companies with logos
+    companies_w_logos = []
+    companies = Company.query.all()
+    for company in companies:
+     if company.has_logo == True:
+         companies_w_logos.append(company.id)
+    
+    print(companies_w_logos)
+
 
     #Pagination
     items_per_page = 5
@@ -309,6 +333,9 @@ def board():
                             categories_full=job_categories_full,
                             job_levels=job_levels,
                             job_types=job_types,
+                            companies_w_logos=companies_w_logos,
+
+                            #logo_urls=logo_urls,
                             
                             page = page,
                             items_on_page = items_on_page,
@@ -498,7 +525,8 @@ def register_step2():
                         address='',
                         num_of_jobs=0,
                         num_of_hidden_jobs=0,
-                        administrator_id=current_user.id)
+                        administrator_id=current_user.id,
+                        has_logo=False)
     db.session.add(new_company)
     db.session.commit()
     return redirect((url_for('register_step3',
@@ -599,19 +627,62 @@ def edit_user():
                                form=personal_profile_form,
                                existing_profile=existing_profile,
                                logged_in = current_user.is_authenticated)
-    
+
+def getLogo(comp_id):
+    try:
+        # check if logo exists
+        s3 = get_client()
+        file_key = f"{comp_id}/logo"
+        file = s3.get_object(Bucket=bucket_logos, Key=file_key)
+        # create url
+        logo_url = f'https://{bucket_logos}.s3.eu-north-1.amazonaws.com/{file_key}'
+        print('logo exists')
+    except:
+        logo_url = None
+        print('no logo')
+    return logo_url
+
 @app.route('/profile/company')
 @login_required
 def company_p():
     company = load_company()
+    comp_id = company.id
+    logo_url = getLogo(comp_id)
+    print(logo_url)
+    
     return render_template('profile/company_p.html',
                            company=company,
+                           logo_url=logo_url,
                            logged_in = current_user.is_authenticated)
 
 @app.route('/profile/setting')
 @login_required
 def setting():
     return render_template('profile/setting.html',
+                           logged_in = current_user.is_authenticated)
+
+@app.route('/profile/company/logo', methods=['GET', 'POST'])
+@login_required
+def upload_logo():
+    company = load_company()
+    logo_form = LogoForm()
+    if logo_form.validate_on_submit() and request.method == 'POST':
+        logo = request.files['logo_file']
+
+        # Upload file to S3 aws
+        s3 = get_client()
+        file_path = f"{company.id}/logo"
+        s3.upload_fileobj(logo, bucket_logos, file_path)
+
+        # Register logo in database
+        company.has_logo = True
+        db.session.commit()
+
+        return redirect(url_for('company_p'))
+    
+    return render_template('profile/upload_logo.html',
+                           form=logo_form,
+                           company=company,
                            logged_in = current_user.is_authenticated)
 
 @app.route('/profile/edit/company', methods=['GET', 'POST'])
@@ -897,7 +968,6 @@ def edit_job(job_id):
     if job_edit_form.validate_on_submit() and request.method == 'POST':
         print('POST')
         job_to_edit.role = request.form['role']
-
         job_to_edit.salary= request.form['salary']
         job_to_edit.start_date = request.form['start_date']
         job_to_edit.job_type = request.form['job_type']
@@ -1027,6 +1097,11 @@ def companies():
 
     companies_len = len(companies_intersection)
 
+    ## get logos
+    #logo_urls = {}
+    #for comp in companies_intersection:
+    #    logo_url = getLogo(comp_id=comp.id)
+    #    logo_urls[comp.id]=logo_url
     
 
     ## ADD PAGINATION
@@ -1061,8 +1136,10 @@ def companies():
 def company(comp_id, name):
     company = Company.query.filter_by(id=comp_id).first()
     company_jobs = Job.query.filter_by(company_id=company.id).where(Job.active==True).all()
+    #logo_url = getLogo(comp_id)
     return render_template('company.html',
                            company=company,
+                           #logo_url=logo_url,
                            company_jobs=company_jobs,
                            logged_in = current_user.is_authenticated)
 
@@ -1071,9 +1148,12 @@ def job(comp_id, name, job_id):
     company = Company.query.filter_by(id=comp_id).first()
     company_jobs = Job.query.filter_by(company_id=company.id).all()
     job = Job.query.filter_by(id=job_id).first()
+    #logo_url = getLogo(comp_id)
+    #print(logo_url)
     print(job.time_publish)
     return render_template('job.html',
                            company=company,
+                           #logo_url=logo_url,
                            job=job,
                            logged_in = current_user.is_authenticated)
 
@@ -1081,8 +1161,12 @@ def job(comp_id, name, job_id):
 def job_clean(job_id):
     job = Job.query.filter_by(id=job_id).first()
     company = Company.query.filter_by(id=job.company_id).first()
+    comp_id = company.id
+    #logo_url = getLogo(comp_id)
+    #print(logo_url)
     return render_template('job.html',
                            job=job,
+                           #logo_url=logo_url,
                            company=company,
                            logged_in = current_user.is_authenticated)
 

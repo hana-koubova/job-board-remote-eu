@@ -1,0 +1,43 @@
+{% extends "base_profile.html" %} {% block profile_content %}
+
+<div id="breadcrumbs" class="d-flex mt-2">
+    <p class="mx-2"><b>></b></p>
+    <a href="{{ url_for('company_p') }}"><p><b>Company</b></p></a>
+    <p class="mx-2"><b>></b></p>
+    <a href="{{ url_for('upload_logo') }}"><p><b>Upload Logo</b></p></a>
+</div>
+
+<section id="upload-logo" class="full-height">
+    <div class="container">
+    
+        <div class="row d-flex justify-content-center mb-3">
+            <div class="col-lg-6 col-md-10 col-sm-12">
+                <h2 class="text-center p-5">Upload Company Logo</h2>
+            </div>
+        </div>
+    
+        <div class="row d-flex justify-content-center mb-5">
+            <div class="col form-fixed">
+    
+                <form method="POST" action="{{ url_for('upload_logo') }}" enctype="multipart/form-data"> 
+                    {{ form.csrf_token }}
+
+                    <!--Upload Logo-->
+                    <div class="row d-flex justify-content-center">
+                        <div class="mb-3">
+                            <label for="formFile" class="form-label">.jpg and .png fomrats, maximum size of 100 Kb</label>
+                            <!--<input class="form-control" type="file" id="formFile" name="logo_file">-->
+                            {{ form.logo_file(id="formFile", class_="form-control")}}
+                            <!--Hello-->
+                        </div>
+                    </div>
+
+                    {{ form.submit(class="primary-btn form-control") }}
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

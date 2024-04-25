@@ -79,10 +79,22 @@
                 {% for comp in companies %}
                 <!--Company card-->
                 <!--<div class="p-4">-->
-                    <div class="p-4 col-sm-10 col-md-5 col-lg-5 col-xl-4">
+                <div class="p-4 col-sm-10 col-md-5 col-lg-5 col-xl-4">
 
                     <div class="white-div shadow-light d-flex flex-column position-relative shadow-strong-hover company-card-div">
-                        <img src="static/images/placeholder-image.jpg" alt="">
+                            
+                            {% if comp.has_logo == false %}
+                                <div class="empty-logo-card"></div>
+                            {% else %}
+                                <div class="logo-space-card">
+                                    <img src="https://job-board-remote-eu-logos.s3.eu-north-1.amazonaws.com/{{comp.id}}/logo" alt="company logo" class="shadow-strong" width="100" height="100">
+                                </div>
+                            {% endif %}
+                            <!--<div class="logo-space-card">
+                            <img src="https://job-board-remote-eu-logos.s3.eu-north-1.amazonaws.com/{{comp.id}}/logo" alt="" class="shadow-strong" width="100" height="100">
+                            </div>-->
+                        
+
                         <div class="p-3">
                             <h5><a class="stretched-link link-dark" href="{{ url_for('company', comp_id=comp.id, name=comp.name_slug ) }}">{{ comp.name }}</a></h5>
                             <p>{{comp.industry}}</p>

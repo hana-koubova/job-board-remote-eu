@@ -35,6 +35,10 @@ class CompanyForm(FlaskForm):
     about = CKEditorField(u"About", validators=[Length(max=3000)])
     submit = SubmitField(label='Submit Information')
 
+class LogoForm(FlaskForm):
+    logo_file = FileField(u"Upload Logo", validators=[DataRequired()])
+    submit = SubmitField(label='Save')
+
 class DeleteForm(FlaskForm):
     reason = StringField(u"Why do you go?", validators=[Length(max=100)])
     submit = SubmitField(label='Delete Account')
@@ -170,3 +174,4 @@ class ApplyForm(FlaskForm):
     a_comments = TextAreaField(u"First Name")
     agree = BooleanField(u"Blah", validators=[DataRequired()])
     submit = SubmitField('Submit Application')
+

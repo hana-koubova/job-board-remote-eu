@@ -968,6 +968,22 @@ section {
   height: 50px;
 }
 
+.empty-logo-card {
+  width: 100%;
+  height: 150px;
+  background-image: url('../images/placeholder-image.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.logo-space-card {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}
+
 /*-----------------------
     ABOUT US PAGE
 -------------------------*/

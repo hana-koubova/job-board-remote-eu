@@ -43,6 +43,7 @@ class Company(db.Model):
     num_of_hidden_jobs: Mapped[int] = mapped_column(Integer)
     address: Mapped[str] = mapped_column(String(100))
     administrator_id: Mapped[int] = mapped_column(Integer, ForeignKey(User1.id))
+    has_logo: Mapped[bool] = mapped_column(Boolean())
     #status: Mapped["User1"] = relationship(back_populates="company_data", passive_deletes=True)
 
     def add_job(self):
