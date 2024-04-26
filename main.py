@@ -231,7 +231,7 @@ def board():
 
     if len(category) == 0 and len(search) == 0:
         print('NO PARAMS')
-        jobs_intersection = Job.query.order_by(desc(Job.time_publish)).all()
+        jobs_intersection = Job.query.filter(Job.active==True).order_by(desc(Job.time_publish)).all()
     else:
         # Exsiting category
         if len(category) > 0:
@@ -259,19 +259,20 @@ def board():
 
             common_category_ids = job_ids.intersection(type_ids, level_ids)
 
-            jobs_intersection = Job.query.filter(Job.id.in_(common_category_ids)).order_by(desc(Job.time_publish)).all()
+            jobs_intersection = Job.query.filter(Job.id.in_(common_category_ids), Job.active==True).order_by(desc(Job.time_publish)).all()
             
 
         # Existing search
         if len(search) > 0:
             print("SEARCH DETECTED")
+            print(search)
             
-            search_filtered = Job.query.order_by(
+            search_filtered = Job.query.filter(Job.active==True).order_by(
                 (desc(Job.time_publish))).filter(or_(
-                Job.role.like(f"%{search[0]}%"),
-                Job.job_info.like(f"%{search[0]}%"),
-                Job.skills.like(f"%{search[0]}%"),
-                Job.category.like(f"%{search[0]}%")
+                Job.role.ilike(f"%{search[0]}%"),
+                Job.job_info.ilike(f"%{search[0]}%"),
+                Job.skills.ilike(f"%{search[0]}%"),
+                Job.category.ilike(f"%{search[0]}%")
                 )).all()
             
             jobs_intersection = search_filtered
