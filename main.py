@@ -164,7 +164,7 @@ def handle_404_error(err):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     print('HELLO')
-    five_recent_jobs = Job.query.order_by(Job.time_publish).all()[:5]
+    five_recent_jobs = Job.query.order_by(desc(Job.time_publish)).all()[:5]
     print(len(five_recent_jobs))
 
     ## Companies with logos
