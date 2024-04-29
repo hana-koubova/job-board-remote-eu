@@ -47,6 +47,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor, CKEditorField
 from sqlalchemy import and_, select, or_, func, desc
+from openpyxl import Workbook
 
 ## Modules
 
@@ -70,18 +71,23 @@ ckeditor = CKEditor(app)
 ## Upload
 
 UPLOAD_FOLDER = 'upload/cv'
-ALLOWED_EXTENSIONS = {'pdf'}
+ALLOWED_EXTENSIONS_PDF = {'pdf'}
+ALLOWED_EXTENSIONS_PIC = {'jpg', 'jpeg', 'png'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 1000 * 1000 ## 1Mb
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 500 ## 500 Kb
 
 ## CKeditor config
 
 #app.config['CKEDITOR_EXTRA_PLUGINS'] = ['wordcount']
 
-def allowed_file(filename):
+def allowed_file_pdf(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_PDF
+
+def allowed_file_pic(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_PIC
 
 ## Bootsrap
 
@@ -665,23 +671,29 @@ def setting():
 @app.route('/profile/company/logo', methods=['GET', 'POST'])
 @login_required
 def upload_logo():
+    error = None
     company = load_company()
     logo_form = LogoForm()
     if logo_form.validate_on_submit() and request.method == 'POST':
         logo = request.files['logo_file']
 
-        # Upload file to S3 aws
-        s3 = get_client()
-        file_path = f"{company.id}/logo"
-        s3.upload_fileobj(logo, bucket_logos, file_path)
+        if allowed_file_pic(logo.filename):
 
-        # Register logo in database
-        company.has_logo = True
-        db.session.commit()
+            # Upload file to S3 aws
+            s3 = get_client()
+            file_path = f"{company.id}/logo"
+            s3.upload_fileobj(logo, bucket_logos, file_path)
 
-        return redirect(url_for('company_p'))
+            # Register logo in database
+            company.has_logo = True
+            db.session.commit()
+
+            return redirect(url_for('company_p'))
+        else:
+            error = 'Only .jpg and .png formats allowed.'
     
     return render_template('profile/upload_logo.html',
+                           error=error,
                            form=logo_form,
                            company=company,
                            logged_in = current_user.is_authenticated)
@@ -895,6 +907,24 @@ def download_excel(job_id):
     applicants = Applicant.query.filter_by(job_id=job_id).all()
     print(len(applicants))
 
+    wb = Workbook()
+    ws = wb.active
+
+    # Add column headers
+
+    ws.append(['First Name', 'Last Name', 'Email', 'Personal Comment', 'Time Applied'])
+
+    # Add data for each applicant
+    for applicant in applicants:
+        ws.append([
+            applicant.a_first_name,
+            applicant.a_last_name,
+            applicant.a_email,
+            applicant.a_comments,
+            applicant.time_applied.strftime('%d-%m-%Y')
+        ])
+    
+    ## For Pandas Library
     #df = pd.DataFrame([{
     #    'First Name': applicant.a_first_name,
     #    'Last Name': applicant.a_last_name,
@@ -904,13 +934,14 @@ def download_excel(job_id):
     #} for applicant in applicants])
 
 
-    #excel_buffer = BytesIO()
+    excel_buffer = BytesIO()
     #df.to_excel(excel_buffer, index=False)
-    #excel_buffer.seek(0)
+    wb.save(excel_buffer)
+    excel_buffer.seek(0)
     
-    #response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
+    response = send_file(excel_buffer, as_attachment=True, download_name="applicants.xlsx")
     #excel_buffer.close()
-    #return response
+    return response
 
 
 @app.route('/profile/manage_jobs', methods=['GET', 'POST'])
@@ -1173,6 +1204,7 @@ def job_clean(job_id):
 
 @app.route('/job/<int:job_id>/apply', methods=['GET', 'POST'])
 def apply(job_id):
+    error = None
     job_id=job_id
     apply_form = ApplyForm()
     
@@ -1184,60 +1216,67 @@ def apply(job_id):
         applicant_number = str(uuid.uuid1())
         #cv_link_str = f"{job_id}_{company.id}_{company.administrator_id}_{applicant_number}"
 
-        new_applicant = Applicant(
-            a_first_name = request.form['a_first_name'],
-            a_last_name = request.form['a_last_name'],
-            a_email = request.form['a_email'],
-            a_cv_link = f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}",
-            a_comments = request.form['a_comments'],
-            job_id = job_id,
-            administrator_id = company.administrator_id,
-            time_applied = datetime.datetime.now()
-        )
-
-        #CV file name: jobId_companyId_administratorId_email_gmail_com_specialCode.pdf
-
-        db.session.add(new_applicant)
-        
-        base_url = 'https://blob.vercel-storage.com'
         file = request.files['a_cv']
-        path_storage = 'uploaded_cvs'
+        #file_name = file.filename
+        if allowed_file_pdf(file.filename):
 
-        ## Local storage upload
-        #if file and allowed_file(file.filename):
-        #    filename = secure_filename(file.filename)
-        #    file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"))
+            new_applicant = Applicant(
+                a_first_name = request.form['a_first_name'],
+                a_last_name = request.form['a_last_name'],
+                a_email = request.form['a_email'],
+                a_cv_link = f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}",
+                a_comments = request.form['a_comments'],
+                job_id = job_id,
+                administrator_id = company.administrator_id,
+                time_applied = datetime.datetime.now()
+            )
 
-        file_path = f"{cvs_folder}/{job_id}/{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"
+            #CV file name: jobId_companyId_administratorId_email_gmail_com_specialCode.pdf
 
-        ## With vercel_storage package vercel_storage.vercel_storage
-        #resp = blob.put(
-        #        pathname=file_path,
-        #        body=file.read(),
-        #        options={'token': ''}
-        #    )
-
-        ## To Vercel Blob Storage
-        #headers = {
-        #    "access": "public",
-        #    "authorization": "Bearer",
-        #    "x-content-type": 'application/pdf',
-        #    "content-disposition": 'attachment/inline; filename="filename.extension"',
-        #}
-
-        #requests.put(f"{base_url}/{path_storage}/{file_path}", data=file.read(), headers=headers)
-
-        ## To Amazon AWS S3
-        s3 = get_client()
-        s3.upload_fileobj(file, bucket_name, file_path)
-        #with open('file', 'rb') as data:
-        #    s3.upload_fileobj(data, bucket_name, file_path)
+            db.session.add(new_applicant)
         
-        db.session.commit()
+            base_url = 'https://blob.vercel-storage.com'
+            #file = request.files['a_cv']
+            path_storage = 'uploaded_cvs'
 
-        return redirect(url_for('apply_success', job_id=job_id))
+            ## Local storage upload
+            #if file and allowed_file(file.filename):
+            #    filename = secure_filename(file.filename)
+            #    file.save(os.path.join(app.config['UPLOAD_FOLDER'], f"{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"))
+
+            file_path = f"{cvs_folder}/{job_id}/{job_id}_{company.id}_{company.administrator_id}_{((request.form['a_email']).replace('@', '_')).replace('.', '_')}_{applicant_number}.pdf"
+
+            ## With vercel_storage package vercel_storage.vercel_storage
+            #resp = blob.put(
+            #        pathname=file_path,
+            #        body=file.read(),
+            #        options={'token': ''}
+            #    )
+
+            ## To Vercel Blob Storage
+            #headers = {
+            #    "access": "public",
+            #    "authorization": "Bearer",
+            #    "x-content-type": 'application/pdf',
+            #    "content-disposition": 'attachment/inline; filename="filename.extension"',
+            #}
+
+            #requests.put(f"{base_url}/{path_storage}/{file_path}", data=file.read(), headers=headers)
+
+            ## To Amazon AWS S3
+            s3 = get_client()
+            s3.upload_fileobj(file, bucket_name, file_path)
+            #with open('file', 'rb') as data:
+            #    s3.upload_fileobj(data, bucket_name, file_path)
+        
+            db.session.commit()
+
+            return redirect(url_for('apply_success', job_id=job_id))
+        else:
+            error = 'Only .pdf formats allowed'
 
     return render_template('apply.html',
+                            error=error,
                             job_id=job_id,
                             form=apply_form,
                             job=job,

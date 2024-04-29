@@ -45,6 +45,9 @@
 
             <div class="mb-3">
                 <!--File upload-->
+                {% if error != None %}
+                <p class="text-danger">{{ error }}</p>
+                {% endif %}
                 <label for="formFile" class="form-label mb-2">Attach your CV (.pdf)</label>
                 <!--<input class="form-control" type="file" id="formFile" required>-->
                 {{ form.a_cv(id="formFile", class_="form-control")}}

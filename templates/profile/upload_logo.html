@@ -25,7 +25,10 @@
                     <!--Upload Logo-->
                     <div class="row d-flex justify-content-center">
                         <div class="mb-3">
-                            <label for="formFile" class="form-label">.jpg and .png fomrats, maximum size of 100 Kb</label>
+                            {% if error != None %}
+                            <p class="text-danger">{{ error }}</p>
+                            {% endif %}
+                            <label for="formFile" class="form-label">.jpg and .png formats, maximum size of 500 Kb</label>
                             <!--<input class="form-control" type="file" id="formFile" name="logo_file">-->
                             {{ form.logo_file(id="formFile", class_="form-control")}}
                             <!--Hello-->
