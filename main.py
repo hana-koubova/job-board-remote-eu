@@ -10,6 +10,7 @@ from io import BytesIO
 import sys
 import requests
 import boto3
+import io
 
 ## Neon
 
@@ -885,19 +886,59 @@ def download_cv(fileurl, job_id):
 @app.route('/profile/download_all_cvs/<int:job_id>', methods=['GET', 'POST'])
 @login_required
 def download_all_cvs(job_id):
-    cv_directory = f"upload/cv/"
-    pattern = cv_directory + f"{job_id}*.pdf"
-    cv_files = glob.glob(pattern)
+    # For local storage
+    #cv_directory = f"upload/cv/"
+    #pattern = cv_directory + f"{job_id}*.pdf"
+    #cv_files = glob.glob(pattern)
+
+    #file_path = f"{cvs_folder}/{job_id}/applicants_cvs.zip
 
     # Create temporal zip file
-    zip_file_path=f'temporal_files/all_{job_id}_csv.zip'
-    with zipfile.ZipFile(zip_file_path, 'w') as zip_file:
-        for cv_file in cv_files:
-            zip_file.write(cv_file, os.path.basename(cv_file))
+    #zip_file_path=f'temporal_files/all_{job_id}_csv.zip'
+    #with zipfile.ZipFile(zip_file_path, 'w') as zip_file:
+    #    for cv_file in cv_files:
+    #        zip_file.write(cv_file, s3.upload_fileobj(cv_file, bucket_name, file_path))
 
-    response = send_file(zip_file_path, as_attachment=True)
+
+    #response = send_file(zip_file_path, as_attachment=True)
     # Remove zip file
-    os.remove(zip_file_path)
+    #os.remove(zip_file_path)
+    #return response
+
+    # Amazon service
+    s3 = get_client()
+    # List objects in the folder
+    all_cvs = s3.list_objects_v2(Bucket=bucket_name, Prefix=f"uploaded_cvs/{job_id}/")
+
+    # Set up an in-memory buffer to write the zip file to
+    zip_buffer = io.BytesIO()
+
+    # Create the zip file
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zip_file:
+        for cv in all_cvs.get('Contents', []):
+            # Skip directories
+            if cv['Key'].endswith('/'):
+                continue
+            
+            # Download the object from S3
+            file_data = s3.get_object(Bucket=bucket_name, Key=cv['Key'])['Body'].read()
+
+            # Get name of applicant
+            match = (cv['Key'].split('/')[2]).split('.')[0]
+            applicant = Applicant.query.filter_by(a_cv_link=match).first()
+            a_first_name = applicant.a_first_name
+            a_last_name = applicant.a_last_name
+            applicant_id = applicant.id
+            applicant_key = f"{a_last_name}_{a_first_name}_{applicant_id}.pdf"
+    
+            # Add the file to the zip archive
+            zip_file.writestr(applicant_key, file_data)
+
+    # Seek to the beginning of the buffer
+    zip_buffer.seek(0)
+
+    # Create a Flask response object with the zip file data
+    response = send_file(zip_buffer, as_attachment=True, download_name="applicants.zip")
     return response
 
 
