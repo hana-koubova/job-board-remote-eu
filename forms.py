@@ -43,6 +43,10 @@ class DeleteForm(FlaskForm):
     reason = StringField(u"Why do you go?", validators=[Length(max=100)])
     submit = SubmitField(label='Delete Account')
      
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField(u'Password', validators=[DataRequired(), Length(min=8)])
+    confirm = PasswordField(u'Confirm Password', validators=[DataRequired(), Length(min=8)])
+    submit = SubmitField(u"Save New Password")
 
 #class EditProfile(FlaskForm):
 #    company = StringField(u"Company / Organisation", validators=[DataRequired()])

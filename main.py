@@ -57,7 +57,7 @@ from helper import url_friendly, load_profile, load_company, load_jobs, load_app
 ## Tables and Forms
 
 from tables import User1, PersonalProfile, Company, Job, Applicant
-from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar, LogoForm
+from forms import RegistrationForm, LoginForm, PersonalProfileForm, CompanyForm, DeleteForm, JobForm, SideCategoryToolbar, SearchForm, ApplyForm, SideIndustryToolbar, LogoForm, ChangePasswordForm
 
 ## Internal
 
@@ -197,26 +197,6 @@ def home():
                            companies_w_logos=companies_w_logos,
                            logged_in = current_user.is_authenticated)
 
-ITEMS = list(range(1, 101))
-
-@app.route('/pagination', methods=['GET', 'POST'])
-def pagination():
-    page = request.args.get('page', 1, type=int)
-    items_per_page = 20
-    total_pages = (len(ITEMS) + items_per_page - 1) // items_per_page
-    total_pages_list = list(range(1, total_pages+1))
-    start = (page - 1) * items_per_page
-    end = start + items_per_page
-
-    items_on_page = ITEMS[start:end]
-    return render_template('pagination.html',
-                           items = ITEMS,
-                           page = page,
-                           items_on_page = items_on_page,
-                           total_pages = total_pages,
-                           total_pages_list = total_pages_list,
-                           logged_in = current_user.is_authenticated)
-
 
 @app.route('/board', methods=['GET', 'POST'])
 def board():
@@ -306,7 +286,7 @@ def board():
 
 
     #Pagination
-    items_per_page = 5
+    items_per_page = 10
     total_pages = (len(jobs_intersection) + items_per_page - 1) // items_per_page
     total_pages_list = list(range(1, total_pages+1))
     start = (page - 1) * items_per_page
@@ -1059,6 +1039,35 @@ def edit_job(job_id):
                            job_types=job_types_full,
                            logged_in = current_user.is_authenticated)
 
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    error = None
+    user = User1.query.filter_by(id=current_user.id).first()
+    change_password_form = ChangePasswordForm()
+    if change_password_form.validate_on_submit() and request.method == 'POST':
+        print('post was done hehe')
+        if request.form['password'] != request.form['confirm']:
+            print(request.form['password'])
+            error = "The passwords don't match"
+            print(error)
+        else:
+            
+            hash_and_salted_password = generate_password_hash(
+                    request.form.get('password'),
+                    method='pbkdf2:sha256',
+                    salt_length=8
+                )
+            user.password = hash_and_salted_password
+            db.session.commit()
+            return redirect(url_for('setting'))
+    return render_template('profile/change_password.html',
+                           error=error,
+                           form=change_password_form,
+                           logged_in = current_user.is_authenticated)
+
+
+
 @app.route('/delete_account', methods=['GET', 'POST'])
 @login_required
 def delete_account():
@@ -1080,13 +1089,31 @@ def delete_account():
         # relevalt jobs to delete if exist
         if bool(Job.query.filter_by(user_id=current_user.id).first()):
             jobs_to_delete = Job.query.filter_by(user_id=current_user.id).all()
-            db.session.deletre(jobs_to_delete)
+            db.session.delete(jobs_to_delete)
 
         # relevant applicants to delete if exist
         if bool(Applicant.query.filter_by(administrator_id=current_user.id).first()):
             applicants_to_delete = Applicant.query.filter_by(administrator_id=current_user.id).all()
             db.session.delete(applicants_to_delete)
+
+        # relevant storage folders to delete if exist
+        s3 = get_client()
+        storage = s3.Object(bucket_name)
+        logos = s3.Object(bucket_logos)
+
+        try:
+            for job_to_delete in jobs_to_delete:
+                storage.objects.filter(Prefix=f'uploaded_cvs/{job_to_delete.id}/').delete()
+        except:
+            print('No CVs detected')
+
+        try:
+            logos.objects.filter(Prefix=f'{company_to_delete.id}/').delete()
+        except:
+            print('No Logo detected')
+        
         db.session.commit()
+
         logout_user()
         return redirect(url_for('home'))
     return render_template('profile/delete_account.html',
@@ -1102,6 +1129,8 @@ def logout():
 def companies():
     search = request.args.getlist('search')
     industry = request.args.getlist('industry')
+
+    page = request.args.get('page', 1, type=int)
 
     filter_form = SideIndustryToolbar()
 
@@ -1179,6 +1208,15 @@ def companies():
 
     ## ADD PAGINATION
 
+    #Pagination
+    items_per_page = 9
+    total_pages = (len(companies_intersection) + items_per_page - 1) // items_per_page
+    total_pages_list = list(range(1, total_pages+1))
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+
+    items_on_page = companies_intersection[start:end]
+
     if request.method == 'POST':
         print('POST')
         filters_by_user = get_categories(request.form)
@@ -1186,22 +1224,28 @@ def companies():
         print(filters_by_user)
         if search_by_user == '':
             print('NO SEARCH')
-            return redirect(url_for('companies', industry=filters_by_user))
+            return redirect(url_for('companies', industry=filters_by_user, page=page))
         if len(filters_by_user) == 0:
             print('NO FILTERS')
-            return redirect(url_for('companies', search=search_by_user))
+            return redirect(url_for('companies', search=search_by_user, page=page))
         if search_by_user != '' and len(filters_by_user) > 0:
             print('FILTERS AND SEARCH')
-            return redirect(url_for('companies', industry=filters_by_user, search=search_by_user))
+            return redirect(url_for('companies', industry=filters_by_user, search=search_by_user, page=page))
         
     return render_template('companies.html',
-                           companies_len=companies_len,
-                           url_query=industry,
-                           search_query=search,
-                           form=filter_form,
-                           industries = company_industries,
-                           companies=companies_intersection,
-                           logged_in = current_user.is_authenticated)
+                            companies_len=companies_len,
+                            url_query=industry,
+                            search_query=search,
+                            form=filter_form,
+                            industries = company_industries,
+                            companies=companies_intersection,
+
+                            page = page,
+                            items_on_page = items_on_page,
+                            total_pages = total_pages,
+                            total_pages_list = total_pages_list,
+
+                            logged_in = current_user.is_authenticated)
 
 
 

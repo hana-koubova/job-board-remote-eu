@@ -326,6 +326,7 @@ section {
 
 .pagination {
     list-style: none;
+    max-height: 60px;
     }
 
 .pagination-wrap {
