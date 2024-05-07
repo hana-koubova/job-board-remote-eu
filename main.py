@@ -151,17 +151,19 @@ with app.app_context():
     
 @app.errorhandler(404)
 def handle_404_error(err):
-    return render_template('404.html')
+    return render_template('404.html',
+                           logged_in = current_user.is_authenticated)
 
-#@app.errorhandler(Exception)
-#def handle_exception(err):
-#    # pass through HTTP errors
-#    if isinstance(err, HTTPException):
-#        return err
-#
-#    # now you're handling non-HTTP exceptions only
-#    return render_template("500.html",
-#                           err=err), 500
+@app.errorhandler(Exception)
+def handle_exception(err):
+    # pass through HTTP errors
+    if isinstance(err, HTTPException):
+        return err
+
+    # now you're handling non-HTTP exceptions only
+    return render_template("500.html",
+                           err=err,
+                           logged_in = current_user.is_authenticated), 500
 
 
 ## Routing
@@ -388,26 +390,6 @@ def board_js():
                             logged_in = current_user.is_authenticated)
 
 
-#@app.route('/ajax', methods=['GET', 'POST'])
-def ajax():
-        if request.method == 'POST':
-            data = request.json.get('data')
-            result = sum(data)
-            return jsonify({'result': result})
-    #return render_template('min_ajax.html')
-
-@app.route('/ajax', methods=['GET', 'POST'])
-def ajax_route():
-    return ajax()
-
-
-@app.route("/search", methods=['GET'])
-def search():
-    query = request.args.get("query") # here query will be the search inputs name
-    search_match = Job.query.filter(Job.title.like("%"+query+"%")).all()
-    return #render_template("search.html", query=query, allVideos=allVideos)
-
-
 @app.route('/post_job', methods=['GET', 'POST'])
 def post_job():
     post_job_form = JobForm()
@@ -459,7 +441,8 @@ def post_job():
 @app.route('/success/<string:message>')
 def success_message(message):
     return render_template('success_message.html',
-                           message=message), {"Refresh": "3; url=/profile"}
+                           message=message,
+                           logged_in = current_user.is_authenticated), {"Refresh": "3; url=/profile"}
 
 @app.route('/about')
 def about():
@@ -810,11 +793,6 @@ def view_cv_old(fileurl):
     #return resp
     return redirect(url_cv)
 
-    
-@app.route('/profile/test_pdf', methods=['GET', 'POST'])
-@login_required
-def view_cv_embed():
-    return render_template('profile/cv_page.html')
 
 @app.route('/profile/view_cv/<fileurl>/<job_id>', methods=['GET', 'POST'])
 @login_required
