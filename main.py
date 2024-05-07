@@ -1,13 +1,9 @@
 import uuid
-import time
 import datetime
 import json
 import os
-import glob
 import zipfile
-#import pandas as pd
 from io import BytesIO
-import sys
 import requests
 import boto3
 import io
@@ -23,7 +19,7 @@ from sqlalchemy import create_engine
 
 ## Flask
 
-from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory, session, jsonify, send_file, send_from_directory, make_response
+from flask import Flask, render_template, request, url_for, redirect, flash, session, jsonify, send_file, send_from_directory, make_response
 #import flask_excel as excel
 
 ## Login and security
@@ -116,6 +112,11 @@ logos_folder = 'uploaded_logos'
 
 def get_client():
     return boto3.client('s3',
+        aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
+        aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY'))
+
+def get_resource():
+    return boto3.resource('s3',
         aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
         aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
@@ -1074,9 +1075,20 @@ def delete_account():
     delete_form = DeleteForm()
     if delete_form.validate_on_submit() and request.method == "POST":
 
-        # deleting user
-        user_to_delete = User1.query.filter_by(id=current_user.id).first()
-        db.session.delete(user_to_delete)
+        # relevant applicants to delete if exist
+        if bool(Applicant.query.filter_by(administrator_id=current_user.id).first()):
+            applicants_to_delete = Applicant.query.filter_by(administrator_id=current_user.id).all()
+            for applicant_to_delete in applicants_to_delete:
+                db.session.delete(applicant_to_delete)
+        
+        # relevalt jobs to delete if exist
+        if bool(Job.query.filter_by(user_id=current_user.id).first()):
+            jobs_to_delete = Job.query.filter_by(user_id=current_user.id).all()
+            for job_to_delete in jobs_to_delete:
+                db.session.delete(job_to_delete)
+        
+        # First commit to prevent f-key error
+        db.session.commit()
 
         # relevant company to delete
         company_to_delete = Company.query.filter_by(administrator_id=current_user.id).first()
@@ -1086,20 +1098,15 @@ def delete_account():
         profile_to_delete = PersonalProfile.query.filter_by(user_id=current_user.id).first()
         db.session.delete(profile_to_delete)
 
-        # relevalt jobs to delete if exist
-        if bool(Job.query.filter_by(user_id=current_user.id).first()):
-            jobs_to_delete = Job.query.filter_by(user_id=current_user.id).all()
-            db.session.delete(jobs_to_delete)
-
-        # relevant applicants to delete if exist
-        if bool(Applicant.query.filter_by(administrator_id=current_user.id).first()):
-            applicants_to_delete = Applicant.query.filter_by(administrator_id=current_user.id).all()
-            db.session.delete(applicants_to_delete)
+        # deleting user
+        user_to_delete = User1.query.filter_by(id=current_user.id).first()
+        db.session.delete(user_to_delete)
 
         # relevant storage folders to delete if exist
-        s3 = get_client()
-        storage = s3.Object(bucket_name)
-        logos = s3.Object(bucket_logos)
+        #s3 = get_client()
+        s3 = get_resource()
+        storage = s3.Bucket(bucket_name)
+        logos = s3.Bucket(bucket_logos)
 
         try:
             for job_to_delete in jobs_to_delete:
