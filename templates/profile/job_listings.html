@@ -14,7 +14,7 @@
 
 
                 <div class="row d-flex justify-content-center">
-                    {% if company.num_of_jobs > 0 %}
+                    {% if (company.num_of_jobs + company.num_of_hidden_jobs)  > 0 %}
                         {% for job in jobs %}
                         <!--Job Card-->
                         {% if job.active %}
